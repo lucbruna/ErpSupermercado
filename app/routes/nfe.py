@@ -6,6 +6,7 @@ from app.nfe.xml_generator import xml_nfe
 from app.nfe.signer import assinar_xml
 from app.nfe.transmitter import transmitir_nfe
 from app.nfe.utils import gerar_chave
+from app.nfe.signer import assinar_xml as assinar
 from datetime import datetime, date
 
 bp = Blueprint('nfe', __name__, url_prefix='/fiscal/nfe')
@@ -185,3 +186,115 @@ def dados_json():
     pendentes = sum(1 for d in docs if d.status in ('01', '02', '03'))
     rejeitadas = sum(1 for d in docs if d.status == '99')
     return jsonify(total=len(docs), autorizadas=autorizadas, pendentes=pendentes, rejeitadas=rejeitadas)
+
+
+@bp.route('/devolucao', methods=['GET', 'POST'])
+@login_required
+def devolucao():
+    config = ConfigFiscal.query.first()
+    if not config:
+        flash('Configure o certificado digital primeiro!', 'danger')
+        return redirect(url_for('fiscal.config'))
+
+    if request.method == 'POST':
+        venda_id = request.form.get('venda_id')
+        cliente_id = request.form.get('cliente_id')
+        justificativa = request.form.get('justificativa', 'Devolucao de mercadoria')
+        cfop = request.form.get('cfop', '5202')
+
+        if not venda_id:
+            flash('Selecione a venda original!', 'danger')
+            return redirect(url_for('nfe.devolucao'))
+
+        empresa = Empresa.query.first()
+        if not empresa or not empresa.cnpj:
+            flash('Configure a Empresa primeiro!', 'danger')
+            return redirect(url_for('cadastros.empresa'))
+
+        venda_orig = Venda.query.get(int(venda_id))
+        if not venda_orig:
+            flash('Venda nao encontrada!', 'danger')
+            return redirect(url_for('nfe.devolucao'))
+
+        cliente = Cliente.query.get(int(cliente_id)) if cliente_id else venda_orig.cliente
+        if not cliente or not cliente.cpf_cnpj:
+            flash('Cliente precisa ter CPF/CNPJ!', 'danger')
+            return redirect(url_for('nfe.devolucao'))
+
+        numero = config.proximo_numero_nfe
+        serie = config.serie_nfe
+        chave = gerar_chave(empresa.cnpj, '55', serie, numero, empresa.uf or 'SP', config.ambiente)
+
+        total = float(venda_orig.total) * -1 if float(venda_orig.total) > 0 else float(venda_orig.total)
+        doc = DocumentoFiscal(
+            modelo='NF-e',
+            serie=serie,
+            numero=numero,
+            chave_acesso=chave,
+            status='01',
+            data_emissao=datetime.now(),
+            cliente_id=cliente.id,
+            venda_id=venda_orig.id,
+            cfop=cfop,
+            natureza_operacao='Devolucao',
+            base_calculo=abs(total),
+            valor_produtos=abs(total),
+            valor_total=abs(total),
+        )
+        db.session.add(doc)
+        db.session.flush()
+
+        for item in venda_orig.itens:
+            if not item.produto:
+                continue
+            val_unit = float(item.valor_unitario or item.preco_unitario or 0)
+            qtd = float(item.quantidade or 1)
+            val_total = val_unit * qtd
+            item_doc = ItemDocumentoFiscal(
+                documento_id=doc.id,
+                produto_id=item.produto_id,
+                quantidade=qtd,
+                valor_unitario=val_unit,
+                valor_total=val_total,
+                ncm=item.produto.ncm or '00',
+                cfop=cfop,
+            )
+            db.session.add(item_doc)
+
+        db.session.flush()
+
+        try:
+            xml_bytes = xml_nfe(doc, config, empresa)
+            doc.status = '02'
+            if config.certificado_digital and config.certificado_senha:
+                xml_assinado = assinar_xml(xml_bytes, config.certificado_digital, config.certificado_senha)
+                doc.xml_assinado = xml_assinado.decode('utf-8')
+                doc.status = '03'
+                db.session.commit()
+
+                if config.ambiente == '1':
+                    resultado = transmitir_nfe(xml_assinado, config, empresa)
+                    if resultado.get('sucesso'):
+                        doc.status = '04'
+                        doc.protocolo = resultado.get('protocolo')
+                        doc.data_autorizacao = datetime.now()
+                        flash(f'NF-e Devolucao {numero} autorizada!', 'success')
+                    else:
+                        doc.status = '99'
+                        flash(f'NF-e rejeitada: {resultado.get("erro", resultado.get("motivo", "Erro"))}', 'danger')
+                else:
+                    doc.status = '04'
+                    doc.protocolo = '999999999999999'
+                    doc.data_autorizacao = datetime.now()
+                    flash(f'NF-e Devolucao {numero} emitida em homologacao!', 'info')
+            config.proximo_numero_nfe = numero + 1
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Erro: {str(e)}', 'danger')
+            return redirect(url_for('nfe.dashboard'))
+
+        return redirect(url_for('nfe.view', id=doc.id))
+
+    vendas = Venda.query.filter_by(status='F').order_by(Venda.id.desc()).limit(100).all()
+    return render_template('nfe_devolucao.html', vendas=vendas)

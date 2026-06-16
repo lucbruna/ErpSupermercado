@@ -106,6 +106,7 @@
     <a href="{{ url_for('sped.index') }}"><i class="bi bi-file-text"></i> SPED Fiscal</a>
     <a href="{{ url_for('tef.config') }}"><i class="bi bi-credit-card"></i> TEF</a>
     <a href="{{ url_for('nfe.dashboard') }}"><i class="bi bi-truck"></i> NF-e</a>
+    <a href="{{ url_for('nfe.devolucao') }}"><i class="bi bi-arrow-return-left"></i> NF-e Devolução</a>
     <a href="{{ url_for('nfse.dashboard') }}"><i class="bi bi-file-text"></i> NFS-e</a>
     {% endif %}
     {% if current_user.papel == 'admin' or has_module('Contabilidade') %}
@@ -125,6 +126,7 @@
     <a href="{{ url_for('cadastros.cobranca') }}"><i class="bi bi-credit-card-2-front"></i> Cobrança</a>
     {% endif %}
     <div class="menu-titulo">Relatórios</div>
+    <a href="{{ url_for('dashboard_real.index') }}"><i class="bi bi-live"></i> Tempo Real</a>
     <a href="{{ url_for('relatorios.dashboard_gerencial') }}"><i class="bi bi-speedometer2"></i> Gerencial</a>
     <a href="{{ url_for('relatorios.vendas') }}"><i class="bi bi-graph-up"></i> Vendas</a>
     <a href="{{ url_for('relatorios.vendas_vendedor') }}"><i class="bi bi-person-badge"></i> Vendedor</a>
@@ -155,6 +157,7 @@
     <a href="{{ url_for('auditoria.lista') }}"><i class="bi bi-clock-history"></i> Auditoria</a>
     <a href="{{ url_for('csv_import.index') }}"><i class="bi bi-file-spreadsheet"></i> Importar CSV</a>
     <a href="{{ url_for('ativos.lista') }}"><i class="bi bi-tools"></i> Ativos</a>
+    <a href="{{ url_for('biometria.dashboard') }}"><i class="bi bi-camera"></i> Biometria</a>
     {% endif %}
     <a href="{{ url_for('pwa.consulta') }}" target="_blank"><i class="bi bi-phone"></i> App Mobile</a>
     <a href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right"></i> Sair</a>

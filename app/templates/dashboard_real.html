@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Tempo Real{% endblock %}
+{% block content %}
+<h2><i class="bi bi-speedometer2"></i> Dashboard Tempo Real</h2>
+<hr>
+<div class="row mb-3">
+    <div class="col-md-3">
+        <div class="card border-primary" id="card-vendas-hoje">
+            <div class="card-body">
+                <small class="text-muted">Vendas Hoje</small>
+                <div class="fs-3 fw-bold" id="r-vendas-hoje">-</div>
+                <small class="r-timestamp text-muted"></small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-success">
+            <div class="card-body">
+                <small class="text-muted">Total Hoje</small>
+                <div class="fs-3 fw-bold" id="r-total-hoje">-</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-info">
+            <div class="card-body">
+                <small class="text-muted">Total no Mês</small>
+                <div class="fs-3 fw-bold" id="r-total-mes">-</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-warning">
+            <div class="card-body">
+                <small class="text-muted">Ticket Médio</small>
+                <div class="fs-3 fw-bold" id="r-ticket">-</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> Este painel atualiza automaticamente em tempo real via WebSocket.
+    <span class="badge bg-success" id="r-status">Conectando...</span>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<script>
+var socket = io();
+socket.on('connect', function() {
+    document.getElementById('r-status').textContent = 'Conectado';
+    document.getElementById('r-status').className = 'badge bg-success';
+    socket.emit('join_dashboard', {room: 'dashboard'});
+});
+socket.on('disconnect', function() {
+    document.getElementById('r-status').textContent = 'Desconectado';
+    document.getElementById('r-status').className = 'badge bg-danger';
+});
+socket.on('dashboard_update', function(d) {
+    document.getElementById('r-vendas-hoje').textContent = d.vendas_hoje;
+    document.getElementById('r-total-hoje').textContent = 'R$ ' + d.total_hoje.toFixed(2);
+    document.getElementById('r-total-mes').textContent = 'R$ ' + d.total_mes.toFixed(2);
+    document.getElementById('r-ticket').textContent = 'R$ ' + d.ticket_medio.toFixed(2);
+    document.querySelector('.r-timestamp').textContent = d.timestamp;
+});
+socket.on('status', function(d) {
+    console.log(d.msg);
+});
+</script>
+{% endblock %}

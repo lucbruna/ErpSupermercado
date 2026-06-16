@@ -109,7 +109,7 @@ body { font-family: Arial, Helvetica, sans-serif; }
     {% if p.codigo_barras %}
     <div class="barcode">{{ p.codigo_barras }}</div>
     {% else %}
-    <div class="barcode">{{ p.codigo or p.id|string }}</div>
+    <div class="barcode">{{ p.codigo_barras or p.id|string }}</div>
     {% endif %}
     <div class="codigo">{{ p.codigo_barras or '' }}</div>
 </div>

@@ -6,6 +6,9 @@ from flask import Flask, flash, redirect, url_for, request, g
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user
 from flask_wtf.csrf import CSRFProtect
+from flask_socketio import SocketIO
+
+socketio = SocketIO()
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -168,6 +171,13 @@ def create_app():
     app.register_blueprint(pwa.bp)
     from app.routes import nfe
     app.register_blueprint(nfe.bp)
+    from app.routes import biometria
+    app.register_blueprint(biometria.bp)
+    from app.routes import dashboard_real
+    app.register_blueprint(dashboard_real.bp)
+
+    from app.socketio_events import init_socketio_events
+    init_socketio_events(app)
 
     @app.context_processor
     def inject_user():
@@ -180,4 +190,4 @@ def create_app():
             return False
         return dict(has_module=has_module, now=datetime.now)
 
-    return app
+    return app, socketio
