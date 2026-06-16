@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: openpg
+      POSTGRES_PASSWORD: openpgpwd
+      POSTGRES_DB: erp_supermercado
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U openpg -d erp_supermercado"]
+      interval: 10s
+      retries: 5
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "5000:5000"
+    environment:
+      SECRET_KEY: ${SECRET_KEY:-chave_segura_aqui}
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_USER: openpg
+      DB_PASS: openpgpwd
+      DB_NAME: erp_supermercado
+      FLASK_DEBUG: "False"
+    volumes:
+      - nfe_certificados:/app/certificados
+      - fotos_biometria:/app/app/static/biometria
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  nfe_certificados:
+  fotos_biometria:
