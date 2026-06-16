@@ -47,11 +47,11 @@ def salvar_capture():
         img_data = base64.b64decode(imagem_b64.split(',')[1] if ',' in imagem_b64 else imagem_b64)
         np_arr = np.frombuffer(img_data, np.uint8)
         frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        rosto, _ = capturar_rosto(frame)
-        if rosto is None:
+        rosto_gray, rosto_color, _ = capturar_rosto(frame)
+        if rosto_color is None:
             flash('Nenhum rosto detectado na foto! Tente novamente com melhor iluminação.', 'danger')
             return redirect(url_for('biometria.cadastrar', usuario_id=usuario_id))
-        ok = treinar(int(usuario_id), rosto)
+        ok = treinar(int(usuario_id), rosto_color)
         if ok:
             flash('Rosto cadastrado com sucesso!', 'success')
         else:
@@ -71,10 +71,10 @@ def verificar():
         img_data = base64.b64decode(imagem_b64.split(',')[1] if ',' in imagem_b64 else imagem_b64)
         np_arr = np.frombuffer(img_data, np.uint8)
         frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        rosto, _ = capturar_rosto(frame)
-        if rosto is None:
+        rosto_gray, rosto_color, _ = capturar_rosto(frame)
+        if rosto_color is None:
             return jsonify({'ok': False, 'erro': 'Nenhum rosto detectado'})
-        label, conf = reconhecer(rosto)
+        label, conf = reconhecer(rosto_color)
         if label is None:
             return jsonify({'ok': False, 'erro': 'Rosto nao reconhecido'})
         usuario = Usuario.query.get(int(label))
