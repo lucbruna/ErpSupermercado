@@ -205,4 +205,10 @@ backend/
 
 ## Licença
 
-MIT
+**Business Source License 1.1** — Uso comercial permitido apenas com licença do autor.
+
+- **Uso não-comercial**: permitido (estudo, teste, educação)
+- **Uso comercial**: requer licença comercial com o licenciante
+- **A partir de 16/06/2029**: converte automaticamente para GPL v3
+
+Veja o arquivo [LICENSE](LICENSE) para detalhes completos.
