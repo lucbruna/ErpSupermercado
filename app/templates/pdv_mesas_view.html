@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Mesa {{ mesa.numero }}{% endblock %}
+{% block content %}
+<h2><i class="bi bi-grid-3x3"></i> Mesa {{ mesa.numero }}
+    <span class="badge bg-{{ 'success' if mesa.status=='01' else 'warning' if mesa.status=='02' else 'info' }}">{{ 'Livre' if mesa.status=='01' else 'Ocupada' if mesa.status=='02' else 'Reservada' }}</span>
+</h2>
+<hr>
+
+<div class="row mb-3">
+    <div class="col-md-4"><strong>Descrição:</strong> {{ mesa.descricao or '-' }}</div>
+    <div class="col-md-4"><strong>Capacidade:</strong> {{ mesa.capacidade }}</div>
+    <div class="col-md-4">
+        {% if mesa.status == '01' %}
+        <form method="POST" action="{{ url_for('mesas.abrir', id=mesa.id) }}" class="d-inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-success"><i class="bi bi-unlock"></i> Abrir Mesa</button>
+        </form>
+        {% elif mesa.status == '02' %}
+        <form method="POST" action="{{ url_for('mesas.fechar', id=mesa.id) }}" class="d-inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-danger" onclick="return confirm('Fechar conta da mesa?')"><i class="bi bi-cash"></i> Fechar Conta</button>
+        </form>
+        {% endif %}
+        <a href="{{ url_for('mesas.lista') }}" class="btn btn-secondary">Voltar</a>
+    </div>
+</div>
+
+{% if mesa.status == '02' %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-header bg-dark text-white">Comanda</div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Produto</th><th>Qtd</th><th>Preço</th><th>Total</th><th>Status</th><th></th></tr></thead>
+                    <tbody>
+                        {% set total = namespace(val=0) %}
+                        {% for item in mesa.comanda_itens %}
+                        {% set st = item.preco * item.quantidade %}{% set total.val = total.val + st %}
+                        <tr>
+                            <td>{{ item.produto.nome if item.produto else '-' }}</td>
+                            <td>{{ item.quantidade }}</td>
+                            <td>R$ {{ "%.2f"|format(item.preco|float) }}</td>
+                            <td>R$ {{ "%.2f"|format(st|float) }}</td>
+                            <td><span class="badge bg-{{ 'warning' if item.status=='01' else 'success' if item.status=='02' else 'secondary' }}">{{ 'Pendente' if item.status=='01' else 'Entregue' if item.status=='02' else 'Cancelado' }}</span></td>
+                            <td>
+                                {% if item.status == '01' %}
+                                <form method="POST" action="{{ url_for('mesas.entregar', id=mesa.id, item_id=item.id) }}" class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button class="btn btn-sm btn-success"><i class="bi bi-check-lg"></i></button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="6" class="text-center text-muted">Nenhum item na comanda.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot><tr class="fw-bold"><td colspan="3">Total</td><td>R$ {{ "%.2f"|format(total.val|float) }}</td><td colspan="2"></td></tr></tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-dark text-white">Adicionar Item</div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('mesas.adicionar', id=mesa.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-2">
+                        <select name="produto_id" class="form-select" required>
+                            <option value="">-- Produto --</option>
+                            {% for p in produtos %}
+                            <option value="{{ p.id }}">{{ p.nome }} - R$ {{ "%.2f"|format(p.preco_venda|float) }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <input type="number" name="quantidade" class="form-control" step="0.001" min="0.001" value="1" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i> Adicionar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

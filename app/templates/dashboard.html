@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-md-3">
+        <div class="card card-dash">
+            <div class="card-body">
+                <i class="bi bi-box icon"></i>
+                <div class="rot">Produtos</div>
+                <div class="num">{{ stats.produtos }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-dash">
+            <div class="card-body">
+                <i class="bi bi-people icon"></i>
+                <div class="rot">Clientes</div>
+                <div class="num">{{ stats.clientes }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-dash">
+            <div class="card-body">
+                <i class="bi bi-truck icon"></i>
+                <div class="rot">Fornecedores</div>
+                <div class="num">{{ stats.fornecedores }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-dash">
+            <div class="card-body">
+                <i class="bi bi-cart icon"></i>
+                <div class="rot">PDV (Caixa)</div>
+                <div class="num">--</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card card-dash">
+            <div class="card-body">
+                <h5 class="card-title">Bem-vindo ao ERP Supermercado</h5>
+                <p class="text-muted">Sistema em construção. Módulos disponíveis: Cadastros.</p>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('cadastros.novo_produto') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Novo Produto</a>
+                    <a href="{{ url_for('cadastros.novo_cliente') }}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Novo Cliente</a>
+                    <a href="{{ url_for('cadastros.novo_fornecedor') }}" class="btn btn-warning"><i class="bi bi-plus-lg"></i> Novo Fornecedor</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

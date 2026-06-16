@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-dash-circle text-danger"></i> Saída de Estoque</h4>
+<div class="card card-dash">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Produto *</label>
+                    <select name="produto_id" class="form-select" required id="selProduto">
+                        <option value="">Selecione o produto</option>
+                        {% for p in produtos %}
+                        <option value="{{ p.id }}" data-est="{{ p.estoque_atual }}">{{ p.nome }} (Est: {{ p.estoque_atual }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Quantidade *</label>
+                    <input type="number" name="quantidade" class="form-control" step="0.001" required>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Estoque Disponível</label>
+                    <input type="text" class="form-control" id="estoqueDisp" readonly value="-">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Motivo *</label>
+                    <select name="motivo" class="form-select" required>
+                        <option value="Venda">Venda</option>
+                        <option value="Perda">Perda/Avaria</option>
+                        <option value="Validade">Vencimento</option>
+                        <option value="Transferência">Transferência</option>
+                        <option value="Uso Interno">Uso Interno</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Documento/Referência</label>
+                    <input type="text" name="documento" class="form-control">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-danger">Registrar Saída</button>
+            <a href="{{ url_for('estoque.movimentacoes') }}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+<script>
+document.getElementById('selProduto').addEventListener('change', function(){
+    var opt = this.options[this.selectedIndex];
+    document.getElementById('estoqueDisp').value = opt.dataset.est || '-';
+});
+</script>
+{% endblock %}

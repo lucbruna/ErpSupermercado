@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Cheques{% endblock %}
+{% block content %}
+<h2><i class="bi bi-cash"></i> Cheques</h2>
+<hr>
+<a href="{{ url_for('cheques.novo') }}" class="btn btn-primary mb-3"><i class="bi bi-plus-lg"></i> Novo Cheque</a>
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <thead class="table-dark">
+            <tr><th>Cliente</th><th>Banco</th><th>Nº Cheque</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+            {% for c in cheques %}
+            <tr>
+                <td>{{ c.cliente.nome if c.cliente else '-' }}</td>
+                <td>{{ c.banco or '-' }}</td>
+                <td>{{ c.numero_cheque or '-' }}</td>
+                <td>R$ {{ "%.2f"|format(c.valor|float) }}</td>
+                <td>{{ c.data_vencimento.strftime('%d/%m/%Y') }}</td>
+                <td>
+                    {% set st = c.status %}
+                    {% set cores = {'01':'secondary','02':'primary','03':'success','04':'danger','99':'dark'} %}
+                    {% set labels = {'01':'Em Carteira','02':'Depositado','03':'Compensado','04':'Devolvido','99':'Cancelado'} %}
+                    <span class="badge bg-{{ cores.get(st,'secondary') }}">{{ labels.get(st, st) }}</span>
+                </td>
+                <td class="text-nowrap">
+                    {% if st == '01' %}
+                    <form method="POST" action="{{ url_for('cheques.depositar', id=c.id) }}" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-sm btn-outline-primary" title="Depositar"><i class="bi bi-bank"></i></button>
+                    </form>
+                    {% elif st == '02' %}
+                    <form method="POST" action="{{ url_for('cheques.compensar', id=c.id) }}" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-sm btn-outline-success" title="Compensar"><i class="bi bi-check-lg"></i></button>
+                    </form>
+                    {% endif %}
+                    {% if st in ('01', '02') %}
+                    <form method="POST" action="{{ url_for('cheques.devolver', id=c.id) }}" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-sm btn-outline-danger" title="Devolver" onclick="return confirm('Devolver cheque?')"><i class="bi bi-arrow-return-left"></i></button>
+                    </form>
+                    <form method="POST" action="{{ url_for('cheques.cancelar', id=c.id) }}" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-sm btn-outline-dark" title="Cancelar" onclick="return confirm('Cancelar cheque?')"><i class="bi bi-x-lg"></i></button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7" class="text-center text-muted">Nenhum cheque.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-credit-card-2-front"></i> Central de Cobrança</h4>
+<div class="card card-dash">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr><th>Cliente</th><th>CPF/CNPJ</th><th>Telefone</th><th>Limite</th><th>Compras</th><th>Ações</th></tr>
+            </thead>
+            <tbody>
+                {% for c in clientes %}
+                {% set contas = c.contas_receber if c.contas_receber is defined else [] %}
+                <tr>
+                    <td><a href="{{ url_for('cadastros.ficha_cliente', id=c.id) }}">{{ c.nome }}</a></td>
+                    <td>{{ c.cpf_cnpj or '-' }}</td>
+                    <td>{{ c.celular or c.telefone or '-' }}</td>
+                    <td>R$ {{ '%.2f'|format(c.limite_credito|float) }}</td>
+                    <td>
+                        <a href="{{ url_for('cadastros.ficha_cliente', id=c.id) }}" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i> Ficha</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-center py-4 text-muted">Nenhum cliente</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

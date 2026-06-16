@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-file-earmark-text"></i> {{ 'Editar' if orc else 'Novo' }} Orçamento</h4>
+<div class="card card-dash p-3">
+    <form method="POST">
+        <div class="row g-2 mb-3">
+            <div class="col-md-4">
+                <label class="form-label">Cliente</label>
+                <select name="cliente_id" class="form-select">
+                    <option value="">Consumidor</option>
+                    {% for c in clientes %}
+                    <option value="{{ c.id }}" {{ 'selected' if orc and orc.cliente_id==c.id }}>{{ c.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Validade</label>
+                <input type="date" name="data_validade" class="form-control" value="{{ orc.data_validade.strftime('%Y-%m-%d') if orc and orc.data_validade else '' }}">
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Observação</label>
+            <textarea name="observacao" class="form-control" rows="2">{{ orc.observacao if orc else '' }}</textarea>
+        </div>
+
+        <h6>Itens</h6>
+        <div class="table-responsive mb-2">
+            <table class="table table-sm" id="tblItens">
+                <thead>
+                    <tr><th>Produto</th><th style="width:100px">Quantidade</th><th style="width:120px">Preço Unit.</th><th style="width:120px">Subtotal</th><th style="width:40px"></th></tr>
+                </thead>
+                <tbody>
+                    {% if orc %}
+                    {% for item in orc.itens %}
+                    <tr>
+                        <td>
+                            <select name="produto_id[]" class="form-select form-select-sm" required>
+                                <option value="">Selecione</option>
+                                {% for p in produtos %}
+                                <option value="{{ p.id }}" {{ 'selected' if item.produto_id==p.id }}>{{ p.nome }} (R$ {{ '%.2f'|format(p.preco_venda) }})</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td><input type="number" name="quantidade[]" class="form-control form-control-sm" step="0.001" value="{{ item.quantidade }}"></td>
+                        <td><input type="number" name="preco[]" class="form-control form-control-sm" step="0.01" value="{{ item.preco_unitario }}"></td>
+                        <td class="subtotal">R$ {{ '%.2f'|format(item.total) }}</td>
+                        <td><button type="button" class="btn btn-sm btn-danger" onclick="this.closest('tr').remove()"><i class="bi bi-x"></i></button></td>
+                    </tr>
+                    {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-secondary mb-3" onclick="addItem()"><i class="bi bi-plus"></i> Adicionar Item</button>
+        <div class="d-flex justify-content-between align-items-center">
+            <div><strong>Total: R$ <span id="totalOrc">0.00</span></strong></div>
+            <div>
+                <a href="{{ url_for('orcamentos.lista') }}" class="btn btn-secondary btn-sm">Cancelar</a>
+                <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const produtos = {{ produtos_json|tojson }};
+function addItem(pid, qtd, preco) {
+    const tbody = document.querySelector('#tblItens tbody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td>
+            <select name="produto_id[]" class="form-select form-select-sm" required onchange="atualizarPreco(this)">
+                <option value="">Selecione</option>
+                ${produtos.map(p => `<option value="${p.id}" ${p.id==pid?'selected':''}>${p.nome} (R$ ${parseFloat(p.preco_venda).toFixed(2)})</option>`).join('')}
+            </select>
+        </td>
+        <td><input type="number" name="quantidade[]" class="form-control form-control-sm" step="0.001" value="${qtd||1}" oninput="calcTotal()"></td>
+        <td><input type="number" name="preco[]" class="form-control form-control-sm" step="0.01" value="${preco||0}" oninput="calcTotal()"></td>
+        <td class="subtotal">R$ 0.00</td>
+        <td><button type="button" class="btn btn-sm btn-danger" onclick="this.closest('tr').remove();calcTotal()"><i class="bi bi-x"></i></button></td>`;
+    tbody.appendChild(tr);
+    if (pid) calcTotal();
+}
+function atualizarPreco(sel) {
+    const opt = sel.options[sel.selectedIndex];
+    const precoInput = sel.closest('tr').querySelector('input[name="preco[]"]');
+    if (opt.value && !precoInput.value || precoInput.value == '0') {
+        const match = opt.text.match(/R\$ ([\d,.]+)/);
+        if (match) precoInput.value = match[1].replace(',', '.');
+    }
+    calcTotal();
+}
+function calcTotal() {
+    let total = 0;
+    document.querySelectorAll('#tblItens tbody tr').forEach(tr => {
+        const qtd = parseFloat(tr.querySelector('input[name="quantidade[]"]').value) || 0;
+        const preco = parseFloat(tr.querySelector('input[name="preco[]"]').value) || 0;
+        const st = qtd * preco;
+        tr.querySelector('.subtotal').textContent = 'R$ ' + st.toFixed(2);
+        total += st;
+    });
+    document.getElementById('totalOrc').textContent = total.toFixed(2);
+}
+document.addEventListener('DOMContentLoaded', calcTotal);
+</script>
+{% endblock %}

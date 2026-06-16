@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Responder Cotação #{{ cotacao.numero }}{% endblock %}
+{% block content %}
+<h2><i class="bi bi-pencil"></i> Resposta: {{ cf.fornecedor.nome }}</h2>
+<h5 class="text-muted">Cotação #{{ cotacao.numero }} — Validade: {{ cotacao.data_validade.strftime('%d/%m/%Y') if cotacao.data_validade else '-' }}</h5>
+<hr>
+<form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="table-responsive">
+        <table class="table table-sm table-bordered">
+            <thead class="table-dark">
+                <tr><th>Produto</th><th>Quantidade</th><th>Preço Unitário</th><th>Subtotal</th></tr>
+            </thead>
+            <tbody>
+                {% for item in itens %}
+                {% set resp = item.respostas.filter_by(cotacao_fornecedor_id=cf.id).first() %}
+                <tr>
+                    <td>{{ item.produto.nome }}</td>
+                    <td>{{ item.quantidade }}</td>
+                    <td>
+                        <input type="number" name="preco_{{ item.id }}" class="form-control form-control-sm" step="0.01" min="0" 
+                               value="{{ resp.preco_unitario if resp else '' }}" 
+                               oninput="calcSub(this, {{ item.quantidade }}, 'sub{{ item.id }}')" required>
+                    </td>
+                    <td id="sub{{ item.id }}">R$ {{ "%.2f"|format((resp.subtotal or 0)|float) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label class="form-label">Prazo de Entrega (dias)</label>
+            <input type="number" name="prazo_entrega" class="form-control" value="{{ cf.prazo_entrega or '' }}">
+        </div>
+        <div class="col-md-8">
+            <label class="form-label">Observação</label>
+            <input type="text" name="observacao" class="form-control" value="{{ cf.observacao or '' }}" placeholder="Condições de pagamento, frete...">
+        </div>
+    </div>
+    <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Registrar Resposta</button>
+    <a href="{{ url_for('cotacoes.visualizar', id=cotacao.id) }}" class="btn btn-secondary">Voltar</a>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+function calcSub(input, qtd, elId) {
+    var preco = parseFloat(input.value) || 0;
+    document.getElementById(elId).textContent = 'R$ ' + (preco * qtd).toFixed(2);
+}
+</script>
+{% endblock %}

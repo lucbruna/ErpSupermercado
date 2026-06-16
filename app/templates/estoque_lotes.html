@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="bi bi-tag"></i> Lotes</h4>
+    <a href="{{ url_for('estoque.movimentacoes') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+</div>
+<div class="card card-dash">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Produto</th>
+                    <th>Código Lote</th>
+                    <th>Quantidade</th>
+                    <th>Preço Custo</th>
+                    <th>Fabricação</th>
+                    <th>Validade</th>
+                    <th>Situação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for l in lotes %}
+                <tr>
+                    <td>{{ l.produto.nome }}</td>
+                    <td>{{ l.codigo }}</td>
+                    <td>{{ l.quantidade }}</td>
+                    <td>R$ {{ "%.2f"|format(l.preco_custo|float) }}</td>
+                    <td>{{ l.data_fabricacao.strftime('%d/%m/%Y') if l.data_fabricacao else '-' }}</td>
+                    <td>{{ l.data_validade.strftime('%d/%m/%Y') if l.data_validade else '-' }}</td>
+                    <td>
+                        {% if l.data_validade and l.data_validade < hoje %}
+                            <span class="badge bg-danger">Vencido</span>
+                        {% elif l.data_validade and l.data_validade <= proximo_mes %}
+                            <span class="badge bg-warning text-dark">Prox. Vencimento</span>
+                        {% else %}
+                            <span class="badge bg-success">Valido</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="text-center text-muted py-4">Nenhum lote registrado</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

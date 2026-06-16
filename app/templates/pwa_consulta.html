@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#1a1a2e">
+<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/static/service-worker.js').catch(function(err) {
+        console.log('SW registration failed:', err);
+    });
+}
+</script>
+<title>Consulta Preço</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 16px; }
+h1 { font-size: 1.2rem; color: #1a1a2e; margin-bottom: 16px; text-align: center; }
+.busca { display: flex; gap: 8px; margin-bottom: 16px; }
+.busca input { flex: 1; padding: 12px; font-size: 1rem; border: 2px solid #ddd; border-radius: 8px; }
+.busca button { padding: 12px 20px; background: #0d6efd; color: #fff; border: none; border-radius: 8px; font-size: 1rem; }
+.resultado { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.resultado .nome { font-size: 1.1rem; font-weight: bold; margin-bottom: 8px; }
+.resultado .preco { font-size: 1.8rem; color: #c00; font-weight: bold; margin-bottom: 8px; }
+.resultado .info { color: #666; font-size: 0.9rem; }
+.erro { color: #c00; text-align: center; padding: 20px; }
+</style>
+</head>
+<body>
+<h1>🔍 Consulta de Preço</h1>
+<div class="busca">
+    <input type="text" id="q" placeholder="Código ou nome do produto" autofocus>
+    <button onclick="buscar()">Buscar</button>
+</div>
+<div id="resultado"></div>
+<script>
+function buscar() {
+    var q = document.getElementById('q').value.trim();
+    if (!q) return;
+    document.getElementById('resultado').innerHTML = '<div class="resultado" style="text-align:center;color:#999;">Buscando...</div>';
+    fetch('/api/produtos/busca?q=' + encodeURIComponent(q))
+        .then(function(r) { return r.json(); })
+        .then(function(lista) {
+            if (lista.length === 0) {
+                document.getElementById('resultado').innerHTML = '<div class="erro">Produto não encontrado</div>';
+                return;
+            }
+            var p = lista[0];
+            document.getElementById('resultado').innerHTML =
+                '<div class="resultado">' +
+                '<div class="nome">' + p.nome + '</div>' +
+                '<div class="preco">R$ ' + p.preco_venda.toFixed(2) + '</div>' +
+                '<div class="info">Cód: ' + (p.codigo || '-') + ' | Estoque: ' + p.estoque_atual + '</div>' +
+                '</div>';
+        })
+        .catch(function() {
+            document.getElementById('resultado').innerHTML = '<div class="erro">Erro ao consultar</div>';
+        });
+}
+document.getElementById('q').addEventListener('keydown', function(e) { if (e.key === 'Enter') buscar(); });
+</script>
+</body>
+</html>

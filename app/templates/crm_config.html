@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Config Fidelidade{% endblock %}
+{% block content %}
+<h2><i class="bi bi-gear"></i> Configuração de Fidelidade</h2>
+<hr>
+<form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Valor por Ponto (R$)</label>
+            <input type="number" name="valor_pontos" class="form-control" step="0.01" value="{{ configs.get('valor_pontos', '0.10') }}">
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Pontos por Real (R$)</label>
+            <input type="number" name="pontos_por_real" class="form-control" step="0.01" value="{{ configs.get('pontos_por_real', '1') }}">
+        </div>
+    </div>
+    <hr>
+    <h6>Valores Atuais</h6>
+    <p class="mb-1">Valor por Ponto: <strong>R$ {{ "%.2f"|format(configs.get('valor_pontos', '0.10')|float) }}</strong></p>
+    <p class="mb-3">Pontos por Real: <strong>{{ configs.get('pontos_por_real', '1') }} pontos / R$ 1,00</strong></p>
+    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Salvar</button>
+    <a href="{{ url_for('crm.dashboard') }}" class="btn btn-secondary">Voltar</a>
+</form>
+{% endblock %}

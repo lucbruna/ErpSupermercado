@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Sugestão de Compra{% endblock %}
+{% block content %}
+<h2><i class="bi bi-cart-plus"></i> Sugestão de Compra Automática</h2>
+<hr>
+<p class="text-muted">Baseado nas vendas dos últimos 30 dias + estoque mínimo + Curva ABC.</p>
+
+<table class="table table-hover table-sm">
+    <thead>
+        <tr>
+            <th>Prioridade</th>
+            <th>Produto</th>
+            <th>Estoque</th>
+            <th>Vendas 30d</th>
+            <th>Classe</th>
+            <th>Qtd Sugerida</th>
+            <th>Fornecedor</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in sugestoes %}
+        <tr class="table-{{ 'danger' if s.classe_abc == 'A' else 'warning' if s.classe_abc == 'B' else '' }}">
+            <td>
+                {% if s.prioridade == 1 %}<span class="badge bg-danger">Urgente</span>
+                {% elif s.prioridade == 2 %}<span class="badge bg-warning text-dark">Médio</span>
+                {% else %}<span class="badge bg-success">Normal</span>{% endif %}
+            </td>
+            <td>{{ s.produto.nome }}</td>
+            <td class="text-end">{{ s.estoque_atual }}</td>
+            <td class="text-end">{{ s.vendas_30d|int }}</td>
+            <td><span class="badge bg-{{ 'danger' if s.classe_abc == 'A' else 'warning' if s.classe_abc == 'B' else 'success' }}">{{ s.classe_abc }}</span></td>
+            <td class="text-end fw-bold">{{ s.quantidade_sugerida|int }}</td>
+            <td>
+                {% if s.produto.item_compra and s.produto.item_compra.pedido %}
+                    <a href="{{ url_for('compras.visualizar', id=s.produto.item_compra.pedido.id) }}">{{ s.produto.item_compra.pedido.fornecedor.nome if s.produto.item_compra.pedido.fornecedor else '' }}</a>
+                {% else %}
+                <form method="POST" action="{{ url_for('compras.novo') }}" class="d-inline">
+                    <input type="hidden" name="produto_id" value="{{ s.produto.id }}">
+                    <button class="btn btn-sm btn-outline-primary"><i class="bi bi-cart-plus"></i> Comprar</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

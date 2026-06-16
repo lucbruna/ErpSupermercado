@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-cash-stack"></i> Resumo do Caixa #{{ caixa.numero }}</h4>
+<div class="row g-3">
+    <div class="col-md-3">
+        <div class="card card-dash"><div class="card-body">
+            <div class="rot">Abertura</div>
+            <div class="num">R$ {{ "%.2f"|format(caixa.valor_abertura|float) }}</div>
+            <small class="text-muted">{{ caixa.data_abertura.strftime('%d/%m/%Y %H:%M') }}</small>
+        </div></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-dash"><div class="card-body">
+            <div class="rot">Total Vendas</div>
+            <div class="num">R$ {{ "%.2f"|format(total_vendas) }}</div>
+            <small class="text-muted">{{ vendas|length }} vendas</small>
+        </div></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-dash"><div class="card-body">
+            <div class="rot">Total Sangrias</div>
+            <div class="num text-danger">- R$ {{ "%.2f"|format(total_sangrias) }}</div>
+            <small class="text-muted">{{ sangrias|length }} retiradas</small>
+        </div></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-dash"><div class="card-body">
+            <div class="rot">Esperado em Caixa</div>
+            <div class="num">R$ {{ "%.2f"|format(caixa.valor_esperado|float) }}</div>
+            <small class="text-muted">Abertura + Vendas - Sangrias</small>
+        </div></div>
+    </div>
+</div>
+<div class="row g-3 mt-1">
+    <div class="col-md-3">
+        <div class="card card-dash"><div class="card-body">
+            <div class="rot">Fechamento</div>
+            <div class="num">{{ 'R$ %.2f'|format(caixa.valor_fechamento|float) if caixa.valor_fechamento else '--' }}</div>
+            {% if caixa.data_fechamento %}<small class="text-muted">{{ caixa.data_fechamento.strftime('%d/%m/%Y %H:%M') }}</small>{% endif %}
+        </div></div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-dash"><div class="card-body">
+            <div class="rot">Diferenca</div>
+            {% set diff = (caixa.valor_fechamento|float if caixa.valor_fechamento else 0) - caixa.valor_esperado|float %}
+            <div class="num {% if diff < 0 %}text-danger{% elif diff > 0 %}text-success{% endif %}">{{ 'R$ %.2f'|format(diff) if caixa.valor_fechamento else '--' }}</div>
+        </div></div>
+    </div>
+</div>
+<div class="row mt-3">
+    <div class="col-md-6">
+        <div class="card card-dash"><div class="card-body">
+            <h6><i class="bi bi-credit-card"></i> Pagamentos por Forma</h6>
+            {% for forma, valor in pagamentos.items() %}
+            <div class="d-flex justify-content-between border-bottom py-1">
+                <span>{{ forma }}</span><strong>R$ {{ "%.2f"|format(valor) }}</strong>
+            </div>
+            {% endfor %}
+        </div></div>
+    </div>
+    <div class="col-md-6">
+        <div class="card card-dash"><div class="card-body">
+            <h6><i class="bi bi-cash-stack"></i> Sangrias</h6>
+            {% for s in sangrias %}
+            <div class="d-flex justify-content-between border-bottom py-1">
+                <div>
+                    <span class="text-danger">- R$ {{ "%.2f"|format(s.valor|float) }}</span>
+                    <small class="text-muted d-block">{{ s.motivo or 'Sem motivo' }} | {{ s.usuario.nome }} | {{ s.created_at.strftime('%H:%M') }}</small>
+                </div>
+            </div>
+            {% else %}
+            <p class="text-muted">Nenhuma sangria</p>
+            {% endfor %}
+        </div></div>
+    </div>
+</div>
+<div class="mt-3">
+    <a href="{{ url_for('pdv.historico_vendas') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+</div>
+{% endblock %}

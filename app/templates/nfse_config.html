@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-gear"></i> Config NFS-e</h4>
+<div class="card card-dash p-4">
+    <form method="POST">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Município IBGE</label>
+                <input type="text" name="municipio_ibge" class="form-control" value="{{ config.municipio_ibge or '' }}">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Município Nome</label>
+                <input type="text" name="municipio_nome" class="form-control" value="{{ config.municipio_nome or '' }}">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Alíquota Padrão (%)</label>
+                <input type="number" name="aliquota_padrao" class="form-control" step="0.01" value="{{ config.aliquota_padrao or 5 }}">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Item Serviço Lista</label>
+                <input type="text" name="item_servico_lista" class="form-control" value="{{ config.item_servico_lista or '' }}">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">CNAE</label>
+                <input type="text" name="cnae" class="form-control" value="{{ config.cnae or '' }}">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Inscrição Municipal</label>
+                <input type="text" name="inscricao_municipal" class="form-control" value="{{ config.inscricao_municipal or '' }}">
+            </div>
+            <div class="col-md-6 mb-3 d-flex align-items-end">
+                <div class="form-check">
+                    <input type="checkbox" name="producao" class="form-check-input" id="producao" {% if config.producao %}checked{% endif %}>
+                    <label class="form-check-label" for="producao">Produção</label>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Salvar</button>
+        <a href="{{ url_for('nfse.dashboard') }}" class="btn btn-secondary">Voltar</a>
+    </form>
+</div>
+{% endblock %}

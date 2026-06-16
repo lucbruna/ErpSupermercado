@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-cart-check"></i> {{ 'Editar' if pedido else 'Novo' }} Pedido de Compra</h4>
+<div class="card card-dash"><div class="card-body">
+<form method="POST" id="formPedido">
+    <input type="hidden" id="itemCount" value="0">
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Fornecedor *</label>
+            <select name="fornecedor_id" class="form-select" required>
+                <option value="">Selecione...</option>
+                {% for f in fornecedores %}
+                <option value="{{ f.id }}" {{ 'selected' if pedido and pedido.fornecedor_id == f.id }}>{{ f.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3 mb-3">
+            <label class="form-label">Data Prevista</label>
+            <input type="date" name="data_prevista" class="form-control" value="{{ pedido.data_prevista.strftime('%Y-%m-%d') if pedido and pedido.data_prevista else '' }}">
+        </div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Observação</label>
+        <textarea name="observacao" class="form-control" rows="2">{{ pedido.observacao if pedido else '' }}</textarea>
+    </div>
+
+    <h6 class="mt-4">Itens do Pedido</h6>
+    <table class="table table-bordered" id="tblItens">
+        <thead class="table-light">
+            <tr><th>Produto</th><th>Quantidade</th><th>Preço Unit.</th><th>Subtotal</th><th></th></tr>
+        </thead>
+        <tbody>
+            {% if pedido %}
+            {% for item in pedido.itens %}
+            <tr>
+                <td>
+                    <select name="produto_id[]" class="form-select" required>
+                        <option value="">Selecione...</option>
+                        {% for p in produtos %}
+                        <option value="{{ p.id }}" {{ 'selected' if item.produto_id == p.id }}>{{ p.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td><input type="number" name="quantidade[]" class="form-control" step="0.001" value="{{ item.quantidade }}" required></td>
+                <td><input type="number" name="preco[]" class="form-control" step="0.01" value="{{ item.preco_unitario }}" required></td>
+                <td class="text-end">R$ {{ "%.2f"|format(item.total|float) }}</td>
+                <td><button type="button" class="btn btn-sm btn-danger" onclick="this.closest('tr').remove()"><i class="bi bi-trash"></i></button></td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+        </tbody>
+        <tfoot>
+            <tr><td colspan="5"><button type="button" class="btn btn-sm btn-success" onclick="addLinha()"><i class="bi bi-plus-lg"></i> Adicionar Item</button></td></tr>
+        </tfoot>
+    </table>
+
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    <a href="{{ url_for('compras.lista') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+</div></div>
+
+<script>
+const produtos = {{ produtos_json|tojson | safe }};
+function addLinha() {
+    const opts = produtos.map(p => `<option value="${p.id}">${p.nome}</option>`).join('');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><select name="produto_id[]" class="form-select" required><option value="">Selecione...</option>${opts}</select></td>
+        <td><input type="number" name="quantidade[]" class="form-control" step="0.001" value="1" required></td>
+        <td><input type="number" name="preco[]" class="form-control" step="0.01" value="0" required></td>
+        <td class="text-end">-</td>
+        <td><button type="button" class="btn btn-sm btn-danger" onclick="this.closest('tr').remove()"><i class="bi bi-trash"></i></button></td>`;
+    document.querySelector('#tblItens tbody').appendChild(tr);
+}
+</script>
+{% endblock %}

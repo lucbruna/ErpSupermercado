@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}eSocial{% endblock %}
+{% block content %}
+<h2><i class="fas fa-cloud-upload-alt"></i> eSocial</h2>
+<hr>
+
+<div class="row mb-3">
+    <div class="col-md-4">
+        <div class="card border-primary">
+            <div class="card-header bg-primary text-white">S-1000 - Empregador</div>
+            <div class="card-body">
+                <p>Informações cadastrais do empregador/contribuinte.</p>
+                <a href="{{ url_for('rh.esocial_s1000') }}" class="btn btn-primary"><i class="fas fa-download"></i> Baixar XML</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h4 class="mt-4">Funcionários</h4>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>PIS</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for f in funcionarios %}
+        <tr>
+            <td>{{ f.nome }}</td>
+            <td>{{ f.cpf }}</td>
+            <td>{{ f.pis }}</td>
+            <td>
+                <div class="btn-group">
+                    <a href="{{ url_for('rh.esocial_gerar', evento='s2200', funcionario_id=f.id) }}" class="btn btn-sm btn-outline-primary" title="S-2200 Admissão"><i class="fas fa-user-plus"></i> S-2200</a>
+                    <a href="{{ url_for('rh.esocial_gerar', evento='s1200', funcionario_id=f.id) }}" class="btn btn-sm btn-outline-success" title="S-1200 Remuneração"><i class="fas fa-money-bill-wave"></i> S-1200</a>
+                    <a href="{{ url_for('rh.caged_gerar_admissao', funcionario_id=f.id) }}" class="btn btn-sm btn-outline-info" title="CAGED Admissão"><i class="fas fa-file-alt"></i> CAGED Adm</a>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

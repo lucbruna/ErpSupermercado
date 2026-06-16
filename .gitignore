@@ -1,0 +1,32 @@
+# Security
+.env
+*.p12
+*.pfx
+*.cert
+*.key
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+*.egg
+dist/
+build/
+
+# Database
+*.sql
+*.dump
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log
+stderr.txt
+stdout.txt

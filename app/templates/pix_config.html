@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Configurar PIX{% endblock %}
+{% block content %}
+<h2><i class="bi bi-qr-code"></i> Configuração PIX</h2>
+<hr>
+<form method="POST" class="row g-3">
+    <div class="col-md-6">
+        <label class="form-label">Chave PIX *</label>
+        <input type="text" name="chave_pix" class="form-control" value="{{ cfg.chave_pix if cfg else '' }}" required
+               placeholder="CPF, CNPJ, email, telefone com DDD ou chave aleatória">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Tipo da Chave</label>
+        <select name="tipo_chave" class="form-select">
+            <option value="cpf" {{ 'selected' if cfg and cfg.tipo_chave == 'cpf' else '' }}>CPF</option>
+            <option value="cnpj" {{ 'selected' if cfg and cfg.tipo_chave == 'cnpj' else '' }}>CNPJ</option>
+            <option value="email" {{ 'selected' if cfg and cfg.tipo_chave == 'email' else '' }}>E-mail</option>
+            <option value="telefone" {{ 'selected' if cfg and cfg.tipo_chave == 'telefone' else '' }}>Telefone</option>
+            <option value="aleatoria" {{ 'selected' if cfg and cfg.tipo_chave == 'aleatoria' else '' }}>Aleatória</option>
+        </select>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Nome do Recebedor *</label>
+        <input type="text" name="nome_recebedor" class="form-control" value="{{ cfg.nome_recebedor if cfg else '' }}" required
+               placeholder="Nome que aparece no app do banco">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Cidade *</label>
+        <input type="text" name="cidade_recebedor" class="form-control" value="{{ cfg.cidade_recebedor if cfg else '' }}" required>
+    </div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Salvar</button>
+    </div>
+</form>
+
+{% if cfg and cfg.chave_pix %}
+<hr>
+<h4>Testar QR Code</h4>
+<div class="row">
+    <div class="col-md-6">
+        <div class="mb-3">
+            <label class="form-label">Valor (R$) para teste</label>
+            <input type="number" id="valor-teste" class="form-control" step="0.01" value="1.00">
+        </div>
+        <button class="btn btn-success" onclick="testarPix()"><i class="bi bi-qr-code"></i> Gerar QR Code</button>
+    </div>
+    <div class="col-md-6 text-center" id="qr-result" style="display:none;">
+        <p><strong>Escaneie com seu banco:</strong></p>
+        <img id="qr-img" src="" alt="QR Code PIX" class="img-fluid" style="max-width:250px;">
+        <p class="mt-2"><small id="qr-payload" class="text-muted"></small></p>
+        <button class="btn btn-sm btn-outline-secondary" onclick="copiarPayload()"><i class="bi bi-clipboard"></i> Copiar</button>
+    </div>
+</div>
+{% endif %}
+
+<script>
+async function testarPix() {
+    const valor = document.getElementById('valor-teste').value;
+    const resp = await fetch('/pix/gerar_qrcode', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content},
+        body: JSON.stringify({valor: parseFloat(valor) || 1}),
+    });
+    const data = await resp.json();
+    if (data.qrcode_base64) {
+        document.getElementById('qr-result').style.display = 'block';
+        document.getElementById('qr-img').src = 'data:image/png;base64,' + data.qrcode_base64;
+        document.getElementById('qr-payload').textContent = 'Copia e Cola: ' + data.payload;
+    }
+}
+function copiarPayload() {
+    const payload = document.getElementById('qr-payload').textContent.replace('Copia e Cola: ', '');
+    navigator.clipboard.writeText(payload);
+    alert('Payload copiado!');
+}
+</script>
+{% endblock %}

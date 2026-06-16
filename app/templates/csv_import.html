@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-file-earmark-spreadsheet"></i> Importação / Exportação CSV</h4>
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card card-dash">
+            <div class="card-header bg-transparent"><strong><i class="bi bi-upload"></i> Importar</strong></div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" action="{{ url_for('csv.importar') }}">
+                    <div class="mb-3">
+                        <label class="form-label">Arquivo CSV *</label>
+                        <input type="file" name="arquivo" class="form-control" accept=".csv" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tipo *</label>
+                        <select name="tipo" class="form-select" required>
+                            <option value="produtos">Produtos</option>
+                            <option value="clientes">Clientes</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Delimitador</label>
+                        <select name="delimitador" class="form-select">
+                            <option value=",">Vírgula (,)</option>
+                            <option value=";">Ponto e vírgula (;)</option>
+                            <option value="	">Tab</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-upload"></i> Importar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card card-dash">
+            <div class="card-header bg-transparent"><strong><i class="bi bi-download"></i> Exportar</strong></div>
+            <div class="card-body">
+                <p class="text-muted">Baixe os dados em formato CSV</p>
+                <div class="d-flex flex-column gap-2">
+                    <a href="{{ url_for('csv.exportar', tipo='produtos') }}" class="btn btn-success"><i class="bi bi-box"></i> Exportar Produtos</a>
+                    <a href="{{ url_for('csv.exportar', tipo='clientes') }}" class="btn btn-info"><i class="bi bi-people"></i> Exportar Clientes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

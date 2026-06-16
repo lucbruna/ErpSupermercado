@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Cotação #{{ cotacao.numero }}{% endblock %}
+{% block content %}
+<h2><i class="bi bi-file-earmark-text"></i> Cotação #{{ cotacao.numero }}
+    <span class="badge bg-{{ 'secondary' if cotacao.status=='01' else 'primary' if cotacao.status=='02' else 'success' if cotacao.status=='03' else 'danger' }}">{{ cotacao_status.get(cotacao.status, cotacao.status) }}</span>
+</h2>
+<hr>
+
+<div class="row mb-3">
+    <div class="col-md-3"><strong>Data:</strong> {{ cotacao.data_cotacao.strftime('%d/%m/%Y') }}</div>
+    <div class="col-md-3"><strong>Validade:</strong> {{ cotacao.data_validade.strftime('%d/%m/%Y') if cotacao.data_validade else '-' }}</div>
+    <div class="col-md-6">
+        {% if cotacao.status == '01' %}
+        <form method="POST" action="{{ url_for('cotacoes.enviar', id=cotacao.id) }}" class="d-inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-primary btn-sm"><i class="bi bi-envelope"></i> Enviar por Email</button>
+        </form>
+        <form method="POST" action="{{ url_for('cotacoes.cancelar', id=cotacao.id) }}" class="d-inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-danger btn-sm" onclick="return confirm('Cancelar cotação?')"><i class="bi bi-x-lg"></i> Cancelar</button>
+        </form>
+        {% endif %}
+        <a href="{{ url_for('cotacoes.lista') }}" class="btn btn-secondary btn-sm">Voltar</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header bg-dark text-white">Itens da Cotação</div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Produto</th><th>Qtd</th><th>Un</th></tr></thead>
+                    <tbody>
+                        {% for item in cotacao.itens.all() %}
+                        <tr><td>{{ item.produto.nome }}</td><td>{{ item.quantidade }}</td><td>{{ item.produto.unidade }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header bg-dark text-white">Fornecedores</div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Fornecedor</th><th>Status</th><th>Total</th><th>Ação</th></tr></thead>
+                    <tbody>
+                        {% for cf in cotacao.fornecedores.all() %}
+                        <tr>
+                            <td>{{ cf.fornecedor.nome }}</td>
+                            <td><span class="badge bg-{{ 'secondary' if cf.status=='01' else 'success' if cf.status=='02' else 'warning' }}">{{ cotacao_forn_status.get(cf.status, cf.status) }}</span></td>
+                            <td>
+                                {% set total_forn = namespace(val=0) %}
+                                {% for r in cf.respostas.all() %}{% set total_forn.val = total_forn.val + (r.subtotal or 0) %}{% endfor %}
+                                R$ {{ "%.2f"|format(total_forn.val|float) }}
+                            </td>
+                            <td>
+                                {% if cotacao.status != '03' and cotacao.status != '99' %}
+                                <a href="{{ url_for('cotacoes.responder', id=cotacao.id, cf_id=cf.id) }}" class="btn btn-sm btn-outline-{{ 'success' if cf.status=='01' else 'secondary' }}"><i class="bi bi-pencil"></i></a>
+                                {% endif %}
+                                {% if cf.status == '02' and cotacao.status != '03' %}
+                                <form method="POST" action="{{ url_for('cotacoes.fechar', id=cotacao.id) }}" class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="melhor_fornecedor" value="{{ cf.id }}">
+                                    <button class="btn btn-sm btn-success" onclick="return confirm('Fechar cotação com {{ cf.fornecedor.nome }}?')"><i class="bi bi-check-lg"></i> Vencedor</button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if cotacao.status == '03' and cotacao.compra_pedido %}
+<div class="alert alert-info">Cotação fechada. Pedido gerado: <a href="{{ url_for('compras.visualizar', id=cotacao.compra_pedido.id) }}">Pedido #{{ cotacao.compra_pedido.numero }}</a></div>
+{% endif %}
+
+{% if cotacao.observacao %}
+<div class="card">
+    <div class="card-header">Observação</div>
+    <div class="card-body">{{ cotacao.observacao }}</div>
+</div>
+{% endif %}
+{% endblock %}

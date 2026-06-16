@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="bi bi-diagram-3"></i> Setores</h4>
+</div>
+<div class="card card-dash mb-3">
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('usuarios.novo_setor') }}" class="d-flex gap-2">
+            <input type="text" name="nome" class="form-control" placeholder="Nome do novo setor" required style="max-width:300px">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Criar Setor</button>
+        </form>
+    </div>
+</div>
+<div class="card card-dash">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr><th>Nome</th><th>Ativo</th><th>Acoes</th></tr>
+            </thead>
+            <tbody>
+                {% for s in setores %}
+                <tr>
+                    <td>
+                        <form method="POST" action="{{ url_for('usuarios.editar_setor', id=s.id) }}" class="d-flex gap-2" id="form-setor-{{ s.id }}">
+                            <input type="text" name="nome" value="{{ s.nome }}" class="form-control form-control-sm" style="width:250px" required>
+                    </td>
+                    <td>
+                        <input type="checkbox" name="ativo" class="form-check-input" {{ 'checked' if s.ativo }} onchange="document.getElementById('form-setor-{{ s.id }}').submit();">
+                    </td>
+                    <td>
+                        <button type="submit" class="btn btn-sm btn-outline-primary"><i class="bi bi-check-lg"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="3" class="text-center text-muted py-4">Nenhum setor cadastrado</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

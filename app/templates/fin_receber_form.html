@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-arrow-up text-success"></i> Nova Conta a Receber</h4>
+<div class="card card-dash"><div class="card-body">
+<form method="POST">
+    <div class="row">
+        <div class="col-md-6 mb-3"><label class="form-label">Descricao *</label><input type="text" name="descricao" class="form-control" required></div>
+        <div class="col-md-3 mb-3"><label class="form-label">Valor *</label><input type="number" name="valor" class="form-control" step="0.01" required></div>
+        <div class="col-md-3 mb-3"><label class="form-label">Vencimento *</label><input type="date" name="data_vencimento" class="form-control" required></div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-3"><label class="form-label">Cliente</label><select name="cliente_id" class="form-select"><option value="">-</option>{% for c in clientes %}<option value="{{ c.id }}">{{ c.nome }}</option>{% endfor %}</select></div>
+        <div class="col-md-4 mb-3"><label class="form-label">Categoria</label><select name="categoria_id" class="form-select"><option value="">-</option>{% for c in categorias %}<option value="{{ c.id }}">{{ c.nome }}</option>{% endfor %}</select></div>
+        <div class="col-md-4 mb-3"><label class="form-label">Documento</label><input type="text" name="documento" class="form-control"></div>
+    </div>
+    <div class="mb-3"><label class="form-label">Observacao</label><textarea name="observacao" class="form-control" rows="2"></textarea></div>
+    <button type="submit" class="btn btn-success">Salvar</button>
+    <a href="{{ url_for('financeiro.lista_receber') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+</div></div>
+{% endblock %}

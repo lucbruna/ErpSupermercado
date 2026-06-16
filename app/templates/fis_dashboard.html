@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="bi bi-file-earmark-text"></i> Documentos Fiscais</h4>
+    <a href="{{ url_for('fiscal.emitir_nfce') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Emitir NFC-e</a>
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-md-3"><div class="card card-dash border-info"><div class="card-body"><div class="rot">Prox. NFC-e</div><div class="num text-info">{{ config.proximo_numero_nfce }}</div></div></div></div>
+    <div class="col-md-3"><div class="card card-dash border-warning"><div class="card-body"><div class="rot">Serie NFC-e</div><div class="num text-warning">{{ config.serie_nfce }}</div></div></div></div>
+    <div class="col-md-3"><div class="card card-dash" style="border-color:{% if config.ambiente=='1' %}#dc3545{% else %}#ffc107{% endif %}"><div class="card-body"><div class="rot">Ambiente</div><div class="num" style="color:{% if config.ambiente=='1' %}#dc3545{% else %}#ffc107{% endif %}">{{ 'Producao' if config.ambiente=='1' else 'Homologacao' }}</div></div></div></div>
+</div>
+<div class="card card-dash"><div class="card-body p-0">
+    <table class="table table-hover mb-0">
+        <thead class="table-light"><tr><th>Modelo</th><th>Nº</th><th>Série</th><th>Data</th><th>Cliente</th><th>Valor</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+            {% for d in docs %}
+            <tr>
+                <td><span class="badge bg-secondary">{{ d.modelo }}</span></td>
+                <td>{{ d.numero }}</td>
+                <td>{{ d.serie }}</td>
+                <td>{{ d.data_emissao.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td>{{ d.cliente.nome if d.cliente else 'Consumidor' }}</td>
+                <td>R$ {{ "%.2f"|format(d.valor_total|float) }}</td>
+                <td><span class="badge bg-{{ 'success' if d.status=='04' else 'warning' if d.status=='01' else 'danger' if d.status in ('05','99') else 'info' }}">{{ fiscal_status[d.status] }}</span></td>
+                <td><a href="{{ url_for('fiscal.visualizar', id=d.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="8" class="text-center text-muted py-4">Nenhum documento</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div></div>
+{% endblock %}

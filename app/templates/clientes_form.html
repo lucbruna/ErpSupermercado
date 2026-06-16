@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-people"></i> {{ 'Editar' if cliente else 'Novo' }} Cliente</h4>
+<div class="card card-dash"><div class="card-body">
+<form method="POST">
+    <div class="row">
+        <div class="col-md-6 mb-3"><label class="form-label">Nome *</label><input type="text" name="nome" class="form-control" value="{{ cliente.nome if cliente else '' }}" required></div>
+        <div class="col-md-3 mb-3"><label class="form-label">CPF/CNPJ</label><input type="text" name="cpf_cnpj" class="form-control" value="{{ cliente.cpf_cnpj if cliente else '' }}"></div>
+        <div class="col-md-3 mb-3"><label class="form-label">RG/IE</label><input type="text" name="rg_ie" class="form-control" value="{{ cliente.rg_ie if cliente else '' }}"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-3"><label class="form-label">Email</label><input type="email" name="email" class="form-control" value="{{ cliente.email if cliente else '' }}"></div>
+        <div class="col-md-4 mb-3"><label class="form-label">Telefone</label><input type="text" name="telefone" class="form-control" value="{{ cliente.telefone if cliente else '' }}"></div>
+        <div class="col-md-4 mb-3"><label class="form-label">Celular</label><input type="text" name="celular" class="form-control" value="{{ cliente.celular if cliente else '' }}"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 mb-3"><label class="form-label">CEP</label><input type="text" name="cep" class="form-control" value="{{ cliente.cep if cliente else '' }}"></div>
+        <div class="col-md-5 mb-3"><label class="form-label">Endereço</label><input type="text" name="endereco" class="form-control" value="{{ cliente.endereco if cliente else '' }}"></div>
+        <div class="col-md-1 mb-3"><label class="form-label">Nº</label><input type="text" name="numero" class="form-control" value="{{ cliente.numero if cliente else '' }}"></div>
+        <div class="col-md-4 mb-3"><label class="form-label">Bairro</label><input type="text" name="bairro" class="form-control" value="{{ cliente.bairro if cliente else '' }}"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-3"><label class="form-label">Cidade</label><input type="text" name="cidade" class="form-control" value="{{ cliente.cidade if cliente else '' }}"></div>
+        <div class="col-md-2 mb-3"><label class="form-label">UF</label><input type="text" name="uf" class="form-control" maxlength="2" value="{{ cliente.uf if cliente else '' }}"></div>
+        <div class="col-md-3 mb-3"><label class="form-label">Limite Crédito</label><input type="number" name="limite_credito" class="form-control" step="0.01" value="{{ cliente.limite_credito if cliente else '0' }}"></div>
+        <div class="col-md-3 mb-3"><label class="form-label">Tabela de Preço</label>
+            <select name="tabela_preco_id" class="form-select">
+                <option value="">Nenhuma</option>
+                {% for t in tabelas %}
+                <option value="{{ t.id }}" {{ 'selected' if cliente and cliente.tabela_preco_id == t.id else '' }}>{{ t.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-success">Salvar</button>
+    <a href="{{ url_for('cadastros.lista_clientes') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+</div></div>
+{% endblock %}

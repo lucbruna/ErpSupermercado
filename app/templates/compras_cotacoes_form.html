@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}{% if cotacao %}Editar{% else %}Nova{% endif %} Cotação{% endblock %}
+{% block content %}
+<h2><i class="bi bi-file-earmark-text"></i> {% if cotacao %}Editar Cotação #{{ cotacao.numero }}{% else %}Nova Cotação{% endif %}</h2>
+<hr>
+<form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label class="form-label">Data Validade</label>
+            <input type="date" name="data_validade" class="form-control" value="{{ cotacao.data_validade.strftime('%Y-%m-%d') if cotacao and cotacao.data_validade else '' }}">
+        </div>
+        <div class="col-md-8">
+            <label class="form-label">Observação</label>
+            <input type="text" name="observacao" class="form-control" value="{{ cotacao.observacao or '' }}" placeholder="Condições gerais...">
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <h5><i class="bi bi-truck"></i> Fornecedores</h5>
+            <div style="max-height:300px;overflow-y:auto;">
+                {% for f in fornecedores %}
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="fornecedores" value="{{ f.id }}" id="forn{{ f.id }}">
+                    <label class="form-check-label" for="forn{{ f.id }}">{{ f.nome }} {% if f.email %} <small class="text-muted">({{ f.email }})</small>{% endif %}</label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <h5><i class="bi bi-box"></i> Itens</h5>
+            <table class="table table-sm" id="tblItens">
+                <thead><tr><th>Produto</th><th>Qtd</th><th></th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <select name="produto_id" class="form-select form-select-sm" required>
+                                <option value="">--</option>
+                                {% for p in produtos %}
+                                <option value="{{ p.id }}">{{ p.nome }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td><input type="number" name="quantidade" class="form-control form-control-sm" step="0.001" value="1" required></td>
+                        <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()"><i class="bi bi-trash"></i></button></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button type="button" class="btn btn-sm btn-outline-success" onclick="addLinha()"><i class="bi bi-plus-lg"></i> Item</button>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Salvar</button>
+    <a href="{{ url_for('cotacoes.lista') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+var produtos = [
+    {% for p in produtos %}{ id: {{ p.id }}, nome: '{{ p.nome|e }}' }{% if not loop.last %},{% endif %}{% endfor %}
+];
+function addLinha() {
+    var tbody = document.querySelector('#tblItens tbody');
+    var tr = document.createElement('tr');
+    var sel = '<select name="produto_id" class="form-select form-select-sm" required><option value="">--</option>';
+    produtos.forEach(function(p) { sel += '<option value="' + p.id + '">' + p.nome + '</option>'; });
+    sel += '</select>';
+    tr.innerHTML = '<td>' + sel + '</td>' +
+        '<td><input type="number" name="quantidade" class="form-control form-control-sm" step="0.001" value="1" required></td>' +
+        '<td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest(\'tr\').remove()"><i class="bi bi-trash"></i></button></td>';
+    tbody.appendChild(tr);
+}
+</script>
+{% endblock %}

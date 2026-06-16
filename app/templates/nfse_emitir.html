@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-plus-circle"></i> Emitir NFS-e</h4>
+<div class="card card-dash p-4">
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="mb-3">
+            <label class="form-label">Cliente *</label>
+            <select name="cliente_id" class="form-select" required>
+                <option value="">Selecione</option>
+                {% for c in clientes %}
+                <option value="{{ c.id }}">{{ c.nome }} ({{ c.cpf_cnpj or '-' }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Descrição</label>
+            <input type="text" name="descricao" class="form-control" placeholder="Descrição do serviço">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Valor (R$) *</label>
+            <input type="number" name="valor" class="form-control" step="0.01" required id="valorInput" oninput="atualizarPreview()">
+        </div>
+        <hr>
+        <h6>Pré-visualização</h6>
+        <div id="preview" class="border rounded p-3 bg-light">
+            <p class="mb-1"><strong>Cliente:</strong> <span id="previewCliente">-</span></p>
+            <p class="mb-1"><strong>Descrição:</strong> <span id="previewDescricao">-</span></p>
+            <p class="mb-1"><strong>Valor:</strong> R$ <span id="previewValor">0,00</span></p>
+        </div>
+        <hr>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i> Emitir</button>
+        <a href="{{ url_for('nfse.dashboard') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function atualizarPreview() {
+    var val = document.getElementById('valorInput').value;
+    document.getElementById('previewValor').textContent = parseFloat(val || 0).toFixed(2).replace('.', ',');
+}
+document.querySelector('select[name="cliente_id"]').addEventListener('change', function() {
+    document.getElementById('previewCliente').textContent = this.options[this.selectedIndex]?.text || '-';
+});
+document.querySelector('input[name="descricao"]').addEventListener('input', function() {
+    document.getElementById('previewDescricao').textContent = this.value || '-';
+});
+</script>
+{% endblock %}

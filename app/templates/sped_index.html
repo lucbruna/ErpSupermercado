@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-file-text"></i> SPED Fiscal - EFD ICMS/IPI</h4>
+<div class="card card-dash p-3">
+    {% if erro %}
+    <div class="alert alert-danger">{{ erro }}</div>
+    {% endif %}
+    <form method="GET" action="{{ url_for('sped.gerar') }}">
+        <div class="row g-2 mb-3">
+            <div class="col-auto">
+                <label class="form-label">Competência (MM/AAAA)</label>
+                <input type="month" name="competencia" class="form-control" required>
+            </div>
+            <div class="col-auto d-flex align-items-end">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-download"></i> Gerar SPED</button>
+            </div>
+        </div>
+    </form>
+    <hr>
+    <h6>Informações</h6>
+    <ul class="text-muted small">
+        <li>Gera arquivo no formato SPED EFD-ICMS/IPI (layout 3.0.1)</li>
+        <li>Inclui documentos NFC-e autorizados no período</li>
+        <li>Inclui movimentações de estoque do período</li>
+        <li>O arquivo gerado deve ser importado no programa PVA da SEFAZ</li>
+        <li><strong>Importante:</strong> Este é um gerador básico. Consulte seu contador para validação.</li>
+    </ul>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Novo Lançamento Contábil{% endblock %}
+{% block content %}
+<h2><i class="bi bi-plus-lg"></i> Novo Lançamento Contábil</h2>
+<hr>
+<form method="POST">
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Data</label>
+            <input type="date" name="data" class="form-control" value="{{ '' if not lancamento else lancamento.data.strftime('%Y-%m-%d') }}" required>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Valor (R$)</label>
+            <input type="number" name="valor" class="form-control" step="0.01" min="0.01" required>
+        </div>
+        <div class="col-md-2 mb-3">
+            <label class="form-label">Lote</label>
+            <input type="text" name="lote" class="form-control" placeholder="Ex: VENDA001">
+        </div>
+        <div class="col-md-2 mb-3">
+            <label class="form-label">Documento</label>
+            <input type="text" name="documento" class="form-control" placeholder="NF nº">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Conta Débito</label>
+            <select name="debito_id" class="form-select" required>
+                <option value="">Selecione...</option>
+                {% for c in contas %}
+                <option value="{{ c.id }}">{{ c.codigo }} - {{ c.descricao[:60] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Conta Crédito</label>
+            <select name="credito_id" class="form-select" required>
+                <option value="">Selecione...</option>
+                {% for c in contas %}
+                <option value="{{ c.id }}">{{ c.codigo }} - {{ c.descricao[:60] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Histórico</label>
+        <textarea name="historico" class="form-control" rows="2" required></textarea>
+    </div>
+    <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> Registrar</button>
+    <a href="{{ url_for('contabilidade.lancamentos') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

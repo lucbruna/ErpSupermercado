@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-arrow-return-left"></i> Devolução - Venda #{{ venda.numero }}</h4>
+<div class="card card-dash p-3">
+    <form method="POST">
+        <div class="mb-3">
+            <label class="form-label">Motivo da Devolução <span class="text-danger">*</span></label>
+            <textarea name="motivo" class="form-control" rows="2" required></textarea>
+        </div>
+        <h6>Itens da Venda</h6>
+        <div class="table-responsive mb-3">
+            <table class="table table-sm table-hover">
+                <thead>
+                    <tr><th style="width:40px">Devolver</th><th>Produto</th><th>Qtd Vendida</th><th>Preço</th><th style="width:120px">Qtd Devolver</th></tr>
+                </thead>
+                <tbody>
+                    {% for item in venda.itens %}
+                    <tr>
+                        <td><input type="checkbox" class="form-check-input" onchange="toggleItem(this)"></td>
+                        <td>{{ item.produto.nome }}</td>
+                        <td>{{ '%.3f'|format(item.quantidade) }}</td>
+                        <td>R$ {{ '%.2f'|format(item.preco_unitario) }}</td>
+                        <td>
+                            <input type="hidden" name="produto_id[]" value="{{ item.produto_id }}" disabled>
+                            <input type="number" name="quantidade[]" class="form-control form-control-sm" step="0.001" max="{{ item.quantidade }}" value="{{ item.quantidade }}" disabled>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="d-flex justify-content-between">
+            <a href="{{ url_for('pdv.venda_detalhe', venda_id=venda.id) }}" class="btn btn-secondary btn-sm">Cancelar</a>
+            <button type="submit" class="btn btn-warning btn-sm"><i class="bi bi-arrow-return-left"></i> Registrar Devolução</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function toggleItem(chk) {
+    const row = chk.closest('tr');
+    const hidden = row.querySelector('input[type="hidden"]');
+    const qtd = row.querySelector('input[name="quantidade[]"]');
+    hidden.disabled = !chk.checked;
+    qtd.disabled = !chk.checked;
+}
+</script>
+{% endblock %}

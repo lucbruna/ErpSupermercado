@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<title>Boleto {{ boleto.numero }}</title>
+<style>
+@page { margin: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Courier New', monospace; padding: 20px; }
+.boleto { width: 210mm; margin: 0 auto; border: 2px solid #333; padding: 15px; }
+.header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 10px; }
+.header h2 { margin: 0; font-size: 18pt; }
+.info-table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+.info-table td { padding: 6px 10px; border: 1px solid #666; font-size: 10pt; }
+.info-table td.label { font-weight: bold; width: 120px; background: #eee; }
+.barcode-area { text-align: center; margin: 20px 0; padding: 15px; border: 1px dashed #999; }
+.barcode-area .linha { font-size: 14pt; letter-spacing: 3px; font-weight: bold; }
+.barcode-area .codigo { font-size: 10pt; color: #666; margin-top: 10px; word-break: break-all; }
+.valor-destaque { font-size: 24pt; font-weight: bold; text-align: center; margin: 15px 0; color: #c00; }
+@media print {
+    .no-print { display: none; }
+    body { padding: 0; }
+}
+</style>
+</head><body>
+<div class="no-print" style="text-align:center;margin-bottom:10px;">
+    <button onclick="window.print()" style="padding:8px 16px;">Imprimir</button>
+    <button onclick="window.close()" style="padding:8px 16px;">Fechar</button>
+</div>
+<div class="boleto">
+    <div class="header">
+        <h2>BOLETO BANCÁRIO</h2>
+        <small>Banco 001 - Banco do Brasil</small>
+    </div>
+    <div class="valor-destaque">R$ {{ "%.2f"|format(boleto.valor|float) }}</div>
+    <table class="info-table">
+        <tr><td class="label">Beneficiário</td><td>{{ boleto.conta_receber.cliente.nome if boleto.conta_receber and boleto.conta_receber.cliente else '-' }}</td></tr>
+        <tr><td class="label">CPF/CNPJ</td><td>{{ boleto.conta_receber.cliente.cpf_cnpj if boleto.conta_receber and boleto.conta_receber.cliente else '-' }}</td></tr>
+        <tr><td class="label">Nosso Número</td><td>{{ boleto.nosso_numero }}</td></tr>
+        <tr><td class="label">Nº Documento</td><td>{{ boleto.numero }}</td></tr>
+        <tr><td class="label">Vencimento</td><td>{{ boleto.data_vencimento.strftime('%d/%m/%Y') }}</td></tr>
+        <tr><td class="label">Valor</td><td>R$ {{ "%.2f"|format(boleto.valor|float) }}</td></tr>
+        <tr><td class="label">Emissão</td><td>{{ boleto.data_emissao.strftime('%d/%m/%Y') }}</td></tr>
+        {% if boleto.data_pagamento %}
+        <tr><td class="label">Pagamento</td><td>{{ boleto.data_pagamento.strftime('%d/%m/%Y') }}</td></tr>
+        <tr><td class="label">Valor Pago</td><td>R$ {{ "%.2f"|format(boleto.valor_pago|float) }}</td></tr>
+        {% endif %}
+    </table>
+    <div class="barcode-area">
+        <div class="linha">{{ boleto.linha_digitavel }}</div>
+        <div class="codigo">{{ boleto.codigo_barras }}</div>
+    </div>
+    <div style="font-size:8pt;text-align:center;color:#999;margin-top:10px;">
+        Código de barras simulado para visualização. Para boletos reais, utilize API de banco.
+    </div>
+</div>
+</body></html>

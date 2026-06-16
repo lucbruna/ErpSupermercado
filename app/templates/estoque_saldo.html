@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="bi bi-list-check"></i> Saldo de Estoque</h4>
+    <a href="{{ url_for('estoque.movimentacoes') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+</div>
+<div class="card card-dash">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Cód. Barras</th>
+                    <th>Produto</th>
+                    <th>Un.</th>
+                    <th>Estoque Atual</th>
+                    <th>Estoque Mínimo</th>
+                    <th>Situação</th>
+                    <th>Preço Custo</th>
+                    <th>Valor Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in produtos %}
+                <tr>
+                    <td>{{ p.codigo_barras or '-' }}</td>
+                    <td>{{ p.nome }}</td>
+                    <td>{{ p.unidade }}</td>
+                    <td><strong>{{ p.estoque_atual }}</strong></td>
+                    <td>{{ p.estoque_minimo }}</td>
+                    <td>
+                        {% if p.estoque_atual <= 0 %}
+                            <span class="badge bg-danger">Sem Estoque</span>
+                        {% elif p.estoque_atual <= p.estoque_minimo %}
+                            <span class="badge bg-warning text-dark">Estoque Baixo</span>
+                        {% else %}
+                            <span class="badge bg-success">Normal</span>
+                        {% endif %}
+                    </td>
+                    <td>R$ {{ "%.2f"|format(p.preco_custo|float) }}</td>
+                    <td>R$ {{ "%.2f"|format((p.estoque_atual * p.preco_custo)|float) }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="8" class="text-center text-muted py-4">Nenhum produto cadastrado</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

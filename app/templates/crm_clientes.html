@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Clientes Fidelidade{% endblock %}
+{% block content %}
+<h2><i class="bi bi-people"></i> Clientes Fidelidade</h2>
+<hr>
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Nome</th>
+                <th>CPF</th>
+                <th>Telefone</th>
+                <th>Pontos</th>
+                <th>Última Compra</th>
+                <th>Total Compras</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in clientes %}
+            <tr>
+                <td>{{ c.nome }}</td>
+                <td>{{ c.cpf_cnpj or '-' }}</td>
+                <td>{{ c.telefone or '-' }}</td>
+                <td><span class="badge bg-warning text-dark">{{ c.pontos_fidelidade or 0 }}</span></td>
+                <td>{{ c.ultima_compra.strftime('%d/%m/%Y') if c.ultima_compra else '-' }}</td>
+                <td>R$ {{ "%.2f"|format(c.total_compras|float) if c.total_compras else '0.00' }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('crm.adicionar_pontos', cliente_id=c.id) }}" class="d-flex gap-1">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="number" name="pontos" class="form-control form-control-sm" style="width:70px" min="1" placeholder="pts" required>
+                        <button class="btn btn-sm btn-success"><i class="bi bi-plus-lg"></i></button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7" class="text-center text-muted">Nenhum cliente cadastrado.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<a href="{{ url_for('crm.dashboard') }}" class="btn btn-secondary">Voltar</a>
+{% endblock %}

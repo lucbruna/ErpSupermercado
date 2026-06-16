@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Nova Filial{% endblock %}
+{% block content %}
+<h2><i class="bi bi-building"></i> {% if filial %}Editar{% else %}Nova{% endif %} Filial</h2>
+<hr>
+<form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Nome <span class="text-danger">*</span></label>
+            <input type="text" name="nome" class="form-control" value="{{ filial.nome if filial else '' }}" required>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label">CNPJ</label>
+            <input type="text" name="cnpj" class="form-control" value="{{ filial.cnpj if filial else '' }}">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-3"><label>CEP</label><input type="text" name="cep" class="form-control" value="{{ filial.cep if filial else '' }}"></div>
+        <div class="col-md-6 mb-3"><label>Endereço</label><input type="text" name="endereco" class="form-control" value="{{ filial.endereco if filial else '' }}"></div>
+        <div class="col-md-2 mb-3"><label>Número</label><input type="text" name="numero" class="form-control" value="{{ filial.numero if filial else '' }}"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-3"><label>Bairro</label><input type="text" name="bairro" class="form-control" value="{{ filial.bairro if filial else '' }}"></div>
+        <div class="col-md-4 mb-3"><label>Cidade</label><input type="text" name="cidade" class="form-control" value="{{ filial.cidade if filial else '' }}"></div>
+        <div class="col-md-2 mb-3"><label>UF</label><input type="text" name="uf" class="form-control" maxlength="2" value="{{ filial.uf if filial else '' }}"></div>
+        <div class="col-md-2 mb-3"><label>Telefone</label><input type="text" name="telefone" class="form-control" value="{{ filial.telefone if filial else '' }}"></div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" name="email" class="form-control" value="{{ filial.email if filial else '' }}">
+    </div>
+    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Salvar</button>
+    <a href="{{ url_for('transferencias.lista_filiais') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

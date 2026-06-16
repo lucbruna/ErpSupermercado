@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-briefcase"></i> {{ 'Editar' if cargo else 'Novo' }} Cargo</h4>
+<div class="card card-dash"><div class="card-body">
+<form method="POST">
+    <div class="row">
+        <div class="col-md-6 mb-3"><label class="form-label">Nome *</label><input type="text" name="nome" class="form-control" required value="{{ cargo.nome if cargo else '' }}"></div>
+        <div class="col-md-3 mb-3"><label class="form-label">Salario Base</label><input type="number" name="salario_base" class="form-control" step="0.01" value="{{ cargo.salario_base if cargo else '0' }}"></div>
+        {% if cargo %}
+        <div class="col-md-3 mb-3"><div class="form-check mt-4"><input type="checkbox" name="ativo" class="form-check-input" id="chkAtivo" {{ 'checked' if cargo.ativo }}><label class="form-check-label" for="chkAtivo">Ativo</label></div></div>
+        {% endif %}
+    </div>
+    <div class="mb-3"><label class="form-label">Descricao</label><textarea name="descricao" class="form-control" rows="3">{{ cargo.descricao if cargo else '' }}</textarea></div>
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    <a href="{{ url_for('rh.lista_cargos') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+</div></div>
+{% endblock %}

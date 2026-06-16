@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Nova Conciliação{% endblock %}
+{% block content %}
+<h2><i class="bi bi-arrow-left-right"></i> Nova Conciliação Bancária</h2>
+<hr>
+
+<form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="mb-3">
+        <label class="form-label">Nome do Arquivo / Referência</label>
+        <input type="text" name="arquivo_nome" class="form-control" placeholder="ex: extrato_junho_2026.ofx">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Lançamentos (tab-separated)</label>
+        <p class="text-muted small">Cole os dados no formato: <code>Tipo[TAB]Valor[TAB]Descrição[TAB]Documento[TAB]Data(YYYY-MM-DD)</code><br>
+        Tipo: C (crédito/entrada) ou D (débito/saída)<br>
+        Exemplo:<br>
+        <code>C	1500.00	Venda cliente X	NF-123	2026-06-01<br>
+        D	350.00	Fornecedor Y	BOL-456	2026-06-02</code></p>
+        <textarea name="linhas" class="form-control" rows="12" style="font-family:monospace;"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary"><i class="bi bi-upload"></i> Importar</button>
+    <a href="{{ url_for('financeiro.lista_conciliacoes') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

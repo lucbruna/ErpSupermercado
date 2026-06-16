@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Boletos{% endblock %}
+{% block content %}
+<h2><i class="bi bi-barcode"></i> Boletos Registrados</h2>
+<hr>
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Número</th>
+                <th>Cliente</th>
+                <th>Valor</th>
+                <th>Vencimento</th>
+                <th>Status</th>
+                <th>Pagamento</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for b in boletos %}
+            <tr>
+                <td>{{ b.numero }}</td>
+                <td>{{ b.cliente.nome if b.cliente else '-' }}</td>
+                <td>R$ {{ b.valor }}</td>
+                <td>{{ b.data_vencimento.strftime('%d/%m/%Y') }}</td>
+                <td>
+                    {% if b.status == 'A' %}
+                    <span class="badge bg-warning text-dark">Aberto</span>
+                    {% elif b.status == 'P' %}
+                    <span class="badge bg-success">Pago</span>
+                    {% elif b.status == 'C' %}
+                    <span class="badge bg-secondary">Cancelado</span>
+                    {% endif %}
+                </td>
+                <td>{{ b.data_pagamento.strftime('%d/%m/%Y') if b.data_pagamento else '-' }}</td>
+                <td class="text-nowrap">
+                    <a href="{{ url_for('financeiro.visualizar_boleto', id=b.id) }}" class="btn btn-sm btn-outline-primary" target="_blank"><i class="bi bi-eye"></i></a>
+                    {% if b.status == 'A' %}
+                    <form method="POST" action="{{ url_for('financeiro.baixar_boleto', id=b.id) }}" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-sm btn-success" onclick="return confirm('Confirmar recebimento?')"><i class="bi bi-check-lg"></i></button>
+                    </form>
+                    <form method="POST" action="{{ url_for('financeiro.cancelar_boleto', id=b.id) }}" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-sm btn-secondary" onclick="return confirm('Cancelar boleto?')"><i class="bi bi-x-lg"></i></button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7" class="text-center text-muted">Nenhum boleto gerado.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

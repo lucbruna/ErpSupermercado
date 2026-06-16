@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="bi bi-tags"></i> Promoções</h4>
+    <a href="{{ url_for('pdv.nova_promocao') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nova Promoção</a>
+</div>
+<div class="card card-dash">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Tipo</th>
+                    <th>Valor</th>
+                    <th>Início</th>
+                    <th>Fim</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in promocoes %}
+                <tr>
+                    <td>{{ p.nome }}</td>
+                    <td>{% if p.tipo == 'porcentagem' %}% Desconto{% elif p.tipo == 'valor' %}Preço Fixo{% else %}Leve Mais{% endif %}</td>
+                    <td>{{ p.valor }}</td>
+                    <td>{{ p.data_inicio.strftime('%d/%m/%Y') if p.data_inicio else '-' }}</td>
+                    <td>{{ p.data_fim.strftime('%d/%m/%Y') if p.data_fim else '-' }}</td>
+                    <td>
+                        {% if p.ativo and p.data_inicio <= hoje and p.data_fim >= hoje %}
+                        <span class="badge bg-success">Ativa</span>
+                        {% elif p.ativo and p.data_inicio > hoje %}
+                        <span class="badge bg-warning text-dark">Agendada</span>
+                        {% elif p.ativo and p.data_fim < hoje %}
+                        <span class="badge bg-secondary">Expirada</span>
+                        {% else %}
+                        <span class="badge bg-danger">Inativa</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('pdv.editar_promocao', id=p.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="text-center text-muted py-4">Nenhuma promoção cadastrada</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

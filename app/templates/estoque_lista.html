@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="bi bi-box-seam"></i> Movimentações de Estoque</h4>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('estoque.entrada') }}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Entrada</a>
+        <a href="{{ url_for('estoque.saida') }}" class="btn btn-danger"><i class="bi bi-dash-lg"></i> Saída</a>
+        <a href="{{ url_for('estoque.saldo') }}" class="btn btn-info"><i class="bi bi-list-check"></i> Saldo</a>
+        <a href="{{ url_for('estoque.lotes') }}" class="btn btn-secondary"><i class="bi bi-tag"></i> Lotes</a>
+    </div>
+</div>
+<div class="card card-dash">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Data</th>
+                    <th>Tipo</th>
+                    <th>Produto</th>
+                    <th>Qtd</th>
+                    <th>Preço Unit.</th>
+                    <th>Fornecedor</th>
+                    <th>Motivo</th>
+                    <th>Usuário</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in movimentacoes %}
+                <tr>
+                    <td>{{ m.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td>
+                        {% if m.tipo == 'E' %}
+                            <span class="badge bg-success">Entrada</span>
+                        {% else %}
+                            <span class="badge bg-danger">Saída</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ m.produto.nome }}</td>
+                    <td>{{ m.quantidade }}</td>
+                    <td>R$ {{ "%.2f"|format(m.preco_unitario|float) }}</td>
+                    <td>{{ m.fornecedor.nome if m.fornecedor else '-' }}</td>
+                    <td>{{ m.motivo or '-' }}</td>
+                    <td>{{ m.usuario.nome if m.usuario else '-' }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="8" class="text-center text-muted py-4">Nenhuma movimentação registrada</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-plus-circle"></i> Novo Cheque</h4>
+<div class="card card-dash p-4">
+    <form method="POST">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Cliente *</label>
+                <select name="cliente_id" class="form-select" required>
+                    <option value="">Selecione</option>
+                    {% for cl in clientes %}
+                    <option value="{{ cl.id }}">{{ cl.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Banco *</label>
+                <input type="text" name="banco" class="form-control" required>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Agência</label>
+                <input type="text" name="agencia" class="form-control">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Conta</label>
+                <input type="text" name="conta" class="form-control">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Nº Cheque *</label>
+                <input type="text" name="numero_cheque" class="form-control" required>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Valor (R$) *</label>
+                <input type="number" name="valor" class="form-control" step="0.01" required>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Data Vencimento *</label>
+                <input type="date" name="data_vencimento" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Data Emissão</label>
+                <input type="date" name="data_emissao" class="form-control" value="{{ now().strftime('%Y-%m-%d') }}">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Salvar</button>
+        <a href="{{ url_for('financeiro.lista_cheques') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

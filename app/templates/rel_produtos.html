@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-box"></i> Produtos</h4>
+<div class="card card-dash p-3 mb-3">
+    <form class="row g-2" id="filtroForm">
+        <div class="col-auto"><label class="form-label">De</label><input type="date" name="de" class="form-control form-control-sm" value="{{ request.args.get('de', d1) }}"></div>
+        <div class="col-auto"><label class="form-label">Até</label><input type="date" name="ate" class="form-control form-control-sm" value="{{ request.args.get('ate', d2) }}"></div>
+        <div class="col-auto d-flex align-items-end"><button class="btn btn-sm btn-warning">Filtrar</button></div>
+    </form>
+</div>
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card card-dash p-3">
+            <h6>Mais Vendidos (Qtd)</h6>
+            <canvas id="chartProdutos" height="250"></canvas>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card card-dash p-3">
+            <h6>Giro Estoque vs Estoque Atual</h6>
+            <canvas id="chartGiro" height="250"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function carregar() {
+    const params = new URLSearchParams(new FormData(document.getElementById('filtroForm'))).toString();
+    const r = await fetch('{{ url_for("relatorios.dados_produtos") }}?' + params);
+    const d = await r.json();
+    const r2 = await fetch('{{ url_for("relatorios.dados_estoque_giro") }}');
+    const g = await r2.json();
+
+    new Chart(document.getElementById('chartProdutos'), {
+        type: 'bar',
+        data: {
+            labels: d.labels,
+            datasets: [{ label: 'Qtd Vendida', data: d.qtd, backgroundColor: '#4e8cff' }]
+        },
+        options: { responsive: true, indexAxis: 'y', scales: { x: { beginAtZero: true } } }
+    });
+
+    new Chart(document.getElementById('chartGiro'), {
+        type: 'bar',
+        data: {
+            labels: g.labels,
+            datasets: [
+                { label: 'Estoque Atual', data: g.estoque, backgroundColor: '#4e8cff' },
+                { label: 'Mínimo', data: g.minimo, backgroundColor: '#ffc107' },
+                { label: 'Saídas (Total)', data: g.saidas, backgroundColor: '#198754' },
+            ]
+        },
+        options: { responsive: true, indexAxis: 'y', scales: { x: { beginAtZero: true } } }
+    });
+}
+carregar();
+</script>
+{% endblock %}

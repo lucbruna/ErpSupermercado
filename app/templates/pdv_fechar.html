@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-lock"></i> Fechar Caixa #{{ caixa.numero }}</h4>
+<div class="row">
+    <div class="col-md-6">
+        <div class="card card-dash">
+            <div class="card-body">
+                <h6>Resumo do Caixa</h6>
+                <div class="d-flex justify-content-between border-bottom py-2">
+                    <span>Operador</span><strong>{{ current_user.nome }}</strong>
+                </div>
+                <div class="d-flex justify-content-between border-bottom py-2">
+                    <span>Data Abertura</span><span>{{ caixa.data_abertura.strftime('%d/%m/%Y %H:%M') }}</span>
+                </div>
+                <div class="d-flex justify-content-between border-bottom py-2">
+                    <span>Valor Abertura</span><strong>R$ {{ "%.2f"|format(caixa.valor_abertura|float) }}</strong>
+                </div>
+                <div class="d-flex justify-content-between border-bottom py-2">
+                    <span>Total Vendas</span><strong class="text-success">R$ {{ "%.2f"|format(caixa.valor_esperado|float) }}</strong>
+                </div>
+                {% set total_sang = caixa.sangrias|sum(attribute='valor')|float %}
+                {% if total_sang > 0 %}
+                <div class="d-flex justify-content-between border-bottom py-2">
+                    <span>Total Sangrias</span><strong class="text-danger">- R$ {{ "%.2f"|format(total_sang) }}</strong>
+                </div>
+                {% endif %}
+                <div class="d-flex justify-content-between border-bottom py-2">
+                    <span>Esperado em Caixa</span><strong>R$ {{ "%.2f"|format(caixa.valor_esperado|float) }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card card-dash">
+            <div class="card-body">
+                <h6>Contagem do Caixa</h6>
+                <form method="POST" action="{{ url_for('pdv.fechar_caixa') }}">
+                    <div class="mb-3">
+                        <label class="form-label">Valor Contado no Caixa (R$) *</label>
+                        <input type="number" name="valor_fechamento" class="form-control form-control-lg" step="0.01" required>
+                    </div>
+                    <button type="submit" class="btn btn-danger btn-lg w-100" onclick="return confirm('Confirmar fechamento do caixa?')">
+                        <i class="bi bi-lock"></i> Fechar Caixa
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mt-3">
+    <a href="{{ url_for('pdv.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+</div>
+{% endblock %}

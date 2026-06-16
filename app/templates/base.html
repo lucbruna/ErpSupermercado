@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1a1a2e">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <title>ERP Supermercado</title>
+    <script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/static/service-worker.js').catch(function(){});
+    }
+    </script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background: #f0f2f5; }
+        .sidebar { width: 220px; height: 100vh; background: #1a1a2e; color: #fff; position: fixed; top: 0; left: 0; z-index: 100; overflow-y: auto; padding-bottom: 24px; }
+        .sidebar .logo { padding: 18px; font-size: 1.2rem; border-bottom: 1px solid #2a2a4e; text-align: center; }
+        .sidebar .logo i { font-size: 1.6rem; color: #4e8cff; }
+        .sidebar a { color: #a0a0c0; text-decoration: none; padding: 10px 18px; display: flex; align-items: center; gap: 10px; transition: 0.2s; font-size: 0.9rem; }
+        .sidebar a:hover, .sidebar a.active { background: #16213e; color: #fff; }
+        .sidebar a i { width: 20px; }
+        .sidebar .menu-titulo { padding: 15px 18px 5px; font-size: 0.7rem; text-transform: uppercase; color: #6c6c8c; letter-spacing: 1px; }
+        .content { margin-left: 220px; padding: 20px; }
+        .topbar { background: #fff; padding: 12px 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 1px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
+        .card-dash { border: none; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+        .card-dash .num { font-size: 2rem; font-weight: 700; color: #1a1a2e; }
+        .card-dash .rot { color: #6c757d; font-size: 0.85rem; }
+        .card-dash .icon { font-size: 2.2rem; opacity: 0.2; position: absolute; right: 15px; top: 15px; }
+        .card-dash { position: relative; overflow: hidden; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="logo"><i class="bi bi-shop"></i><br>ERP Supermercado</div>
+    <div class="menu-titulo">Principal</div>
+    <a href="{{ url_for('cadastros.dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    {% if current_user.papel == 'admin' %}
+    <div class="menu-titulo">Cadastros</div>
+    <a href="{{ url_for('cadastros.lista_produtos') }}"><i class="bi bi-box"></i> Produtos</a>
+    <a href="{{ url_for('cadastros.lista_clientes') }}"><i class="bi bi-people"></i> Clientes</a>
+    <a href="{{ url_for('cadastros.lista_fornecedores') }}"><i class="bi bi-truck"></i> Fornecedores</a>
+    <a href="{{ url_for('cadastros.lista_categorias') }}"><i class="bi bi-tags"></i> Categorias</a>
+    <a href="{{ url_for('cadastros.lista_empresas') }}"><i class="bi bi-building"></i> Empresa</a>
+    <a href="{{ url_for('precos.lista') }}"><i class="bi bi-currency-dollar"></i> Tabelas de Preço</a>
+    <div class="menu-titulo">Relatórios</div>
+    <a href="{{ url_for('relatorios.dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    {% endif %}
+    {% if current_user.papel == 'admin' or has_module('Estoque') %}
+    <div class="menu-titulo">Estoque</div>
+    <a href="{{ url_for('estoque.movimentacoes') }}"><i class="bi bi-box-seam"></i> Movimentações</a>
+    <a href="{{ url_for('estoque.entrada') }}"><i class="bi bi-plus-circle"></i> Entrada</a>
+    <a href="{{ url_for('estoque.saida') }}"><i class="bi bi-dash-circle"></i> Saída</a>
+    <a href="{{ url_for('estoque.saldo') }}"><i class="bi bi-list-check"></i> Saldo</a>
+    <a href="{{ url_for('estoque.lotes') }}"><i class="bi bi-tag"></i> Lotes</a>
+    <a href="{{ url_for('estoque.curva_abc') }}"><i class="bi bi-bar-chart-steps"></i> Curva ABC</a>
+    <a href="{{ url_for('estoque.inventario') }}"><i class="bi bi-clipboard-data"></i> Inventário</a>
+    <a href="{{ url_for('estoque.sugestao_compra') }}"><i class="bi bi-cart-plus"></i> Sugestão Compra</a>
+    <a href="{{ url_for('estoque.kardex') }}"><i class="bi bi-journal-text"></i> Kardex</a>
+    <a href="{{ url_for('estoque.etiquetas') }}"><i class="bi bi-tags"></i> Etiquetas</a>
+    <a href="{{ url_for('transferencias.lista') }}"><i class="bi bi-arrows-left-right"></i> Transferências</a>
+    <a href="{{ url_for('transferencias.lista_filiais') }}"><i class="bi bi-building"></i> Filiais</a>
+    <a href="{{ url_for('producao.lista') }}"><i class="bi bi-gear"></i> Produção</a>
+    {% endif %}
+    {% if current_user.papel == 'admin' or has_module('PDV') %}
+    <div class="menu-titulo">PDV</div>
+    <a href="{{ url_for('pdv.index') }}"><i class="bi bi-cart"></i> Caixa</a>
+    <a href="{{ url_for('pdv.historico_vendas') }}"><i class="bi bi-receipt"></i> Vendas</a>
+    <a href="{{ url_for('pdv.lista_sangrias') }}"><i class="bi bi-cash-stack"></i> Sangrias</a>
+    <a href="{{ url_for('pdv.lista_promocoes') }}"><i class="bi bi-tags"></i> Promoções</a>
+    <a href="{{ url_for('pdv.balanca_config') }}"><i class="bi bi-weights"></i> Balança</a>
+    <a href="{{ url_for('devolucao.lista') }}"><i class="bi bi-arrow-return-left"></i> Devoluções</a>
+    <a href="{{ url_for('orcamentos.lista') }}"><i class="bi bi-file-earmark-text"></i> Orçamentos</a>
+    <a href="{{ url_for('mesas.lista') }}"><i class="bi bi-grid-3x3"></i> Mesas</a>
+    {% endif %}
+    {% if current_user.papel == 'admin' or has_module('Compras') %}
+    <div class="menu-titulo">Compras</div>
+    <a href="{{ url_for('compras.lista') }}"><i class="bi bi-cart-check"></i> Pedidos</a>
+    <a href="{{ url_for('cotacoes.lista') }}"><i class="bi bi-file-earmark-text"></i> Cotações</a>
+    {% endif %}
+    {% if current_user.papel == 'admin' or has_module('RH') %}
+    <div class="menu-titulo">RH</div>
+    <a href="{{ url_for('rh.lista_funcionarios') }}"><i class="bi bi-person-badge"></i> Funcionários</a>
+    <a href="{{ url_for('rh.lista_cargos') }}"><i class="bi bi-briefcase"></i> Cargos</a>
+    <a href="{{ url_for('rh.lista_folhas') }}"><i class="bi bi-file-text"></i> Folha</a>
+    <a href="{{ url_for('rh.lista_ponto') }}"><i class="bi bi-clock"></i> Ponto</a>
+    <a href="{{ url_for('rh.esocial_index') }}"><i class="bi bi-cloud-upload-alt"></i> eSocial</a>
+    <a href="{{ url_for('rh.caged_index') }}"><i class="bi bi-file-alt"></i> CAGED</a>
+    {% endif %}
+    {% if current_user.papel == 'admin' or has_module('Financeiro') %}
+    <div class="menu-titulo">Financeiro</div>
+    <a href="{{ url_for('financeiro.lista_pagar') }}"><i class="bi bi-arrow-down-circle"></i> Pagar</a>
+    <a href="{{ url_for('financeiro.lista_receber') }}"><i class="bi bi-arrow-up-circle"></i> Receber</a>
+    <a href="{{ url_for('financeiro.fluxo_caixa') }}"><i class="bi bi-graph-up"></i> Fluxo</a>
+    <a href="{{ url_for('financeiro.lista_boletos') }}"><i class="bi bi-barcode"></i> Boletos</a>
+    <a href="{{ url_for('financeiro.lista_conciliacoes') }}"><i class="bi bi-arrow-left-right"></i> Conciliação</a>
+    <a href="{{ url_for('cheques.lista') }}"><i class="bi bi-cash"></i> Cheques</a>
+    {% endif %}
+    {% if current_user.papel == 'admin' or has_module('Fiscal') %}
+    <div class="menu-titulo">Fiscal</div>
+    <a href="{{ url_for('fiscal.dashboard') }}"><i class="bi bi-file-earmark-text"></i> NFC-e / SAT</a>
+    <a href="{{ url_for('fiscal.sat_config') }}"><i class="bi bi-sat"></i> Config SAT</a>
+    <a href="{{ url_for('fiscal.lista_convenios') }}"><i class="bi bi-handshake"></i> Convênios</a>
+    <a href="{{ url_for('fiscal.config') }}"><i class="bi bi-gear"></i> Config Fiscal</a>
+    <a href="{{ url_for('sped.index') }}"><i class="bi bi-file-text"></i> SPED Fiscal</a>
+    <a href="{{ url_for('tef.config') }}"><i class="bi bi-credit-card"></i> TEF</a>
+    <a href="{{ url_for('nfe.dashboard') }}"><i class="bi bi-truck"></i> NF-e</a>
+    <a href="{{ url_for('nfse.dashboard') }}"><i class="bi bi-file-text"></i> NFS-e</a>
+    {% endif %}
+    {% if current_user.papel == 'admin' or has_module('Contabilidade') %}
+    <div class="menu-titulo">Contabilidade</div>
+    <a href="{{ url_for('contabilidade.dashboard') }}"><i class="bi bi-calculator"></i> Dashboard</a>
+    <a href="{{ url_for('contabilidade.plano_contas') }}"><i class="bi bi-journal-text"></i> Plano de Contas</a>
+    <a href="{{ url_for('contabilidade.lancamentos') }}"><i class="bi bi-list-check"></i> Lançamentos</a>
+    <a href="{{ url_for('contabilidade.ecd_gerar') }}"><i class="bi bi-file-text"></i> ECD</a>
+    <a href="{{ url_for('contabilidade.ecf_gerar') }}"><i class="bi bi-file-earmark-text"></i> ECF</a>
+    {% endif %}
+    {% if current_user.papel == 'admin' %}
+    <div class="menu-titulo">CRM</div>
+    <a href="{{ url_for('crm.dashboard') }}"><i class="bi bi-star"></i> Fidelidade</a>
+    <a href="{{ url_for('crm.clientes') }}"><i class="bi bi-people"></i> Clientes</a>
+    <a href="{{ url_for('crm.metas') }}"><i class="bi bi-trophy"></i> Metas</a>
+    <a href="{{ url_for('crm.metas_nova') }}"><i class="bi bi-plus-circle"></i> Nova Meta</a>
+    <a href="{{ url_for('cadastros.cobranca') }}"><i class="bi bi-credit-card-2-front"></i> Cobrança</a>
+    {% endif %}
+    <div class="menu-titulo">Relatórios</div>
+    <a href="{{ url_for('relatorios.dashboard_gerencial') }}"><i class="bi bi-speedometer2"></i> Gerencial</a>
+    <a href="{{ url_for('relatorios.vendas') }}"><i class="bi bi-graph-up"></i> Vendas</a>
+    <a href="{{ url_for('relatorios.vendas_vendedor') }}"><i class="bi bi-person-badge"></i> Vendedor</a>
+    <a href="{{ url_for('relatorios.produtos') }}"><i class="bi bi-box"></i> Produtos</a>
+    <a href="{{ url_for('relatorios.margem') }}"><i class="bi bi-percent"></i> Margem</a>
+    <a href="{{ url_for('relatorios.giro') }}"><i class="bi bi-arrow-repeat"></i> Giro Estoque</a>
+    <a href="{{ url_for('relatorios.dre') }}"><i class="bi bi-file-text"></i> DRE</a>
+    <div class="menu-titulo">Configurações</div>
+    {% if current_user.papel == 'admin' %}
+    <a href="{{ url_for('pix.config') }}"><i class="bi bi-qr-code"></i> PIX</a>
+    <a href="{{ url_for('fiscal.config') }}"><i class="bi bi-gear"></i> Fiscal</a>
+    <a href="{{ url_for('fiscal.sat_config') }}"><i class="bi bi-sat"></i> SAT</a>
+    <a href="{{ url_for('tef.config') }}"><i class="bi bi-credit-card"></i> TEF</a>
+    <a href="{{ url_for('pdv.balanca_config') }}"><i class="bi bi-weights"></i> Balança</a>
+    <a href="{{ url_for('backup.lista') }}"><i class="bi bi-cloud-arrow-up"></i> Backup</a>
+    <a href="{{ url_for('config_email.config') }}"><i class="bi bi-envelope"></i> Email</a>
+    <a href="{{ url_for('config_whatsapp.config') }}"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+    {% endif %}
+    <div class="menu-titulo">Sistema</div>
+    {% if current_user.papel == 'admin' %}
+    <a href="{{ url_for('usuarios.lista') }}"><i class="bi bi-people"></i> Usuarios</a>
+    <a href="{{ url_for('usuarios.lista_setores') }}"><i class="bi bi-diagram-3"></i> Setores</a>
+    {% elif current_user.papel == 'chefe_setor' %}
+    <a href="{{ url_for('usuarios.lista') }}"><i class="bi bi-people"></i> Usuarios</a>
+    {% endif %}
+    <a href="{{ url_for('auth.minha_senha') }}"><i class="bi bi-key"></i> Minha Senha</a>
+    {% if current_user.papel == 'admin' %}
+    <a href="{{ url_for('auditoria.lista') }}"><i class="bi bi-clock-history"></i> Auditoria</a>
+    <a href="{{ url_for('csv_import.index') }}"><i class="bi bi-file-spreadsheet"></i> Importar CSV</a>
+    <a href="{{ url_for('ativos.lista') }}"><i class="bi bi-tools"></i> Ativos</a>
+    {% endif %}
+    <a href="{{ url_for('pwa.consulta') }}" target="_blank"><i class="bi bi-phone"></i> App Mobile</a>
+    <a href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right"></i> Sair</a>
+</div>
+<div class="content">
+    <div class="topbar">
+        <span><strong>Olá, {{ current_user.nome }}</strong></span>
+        <span>
+            <a href="{{ url_for('notificacoes.lista') }}" class="btn btn-sm btn-outline-secondary position-relative me-2">
+                <i class="bi bi-bell"></i>
+                <span id="notif-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.6rem;display:none;">0</span>
+            </a>
+            <span class="text-muted">{{ now().strftime('%d/%m/%Y') if now else '' }}</span>
+        </span>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+</div>
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ── CSRF Protection: inject token into all forms and AJAX ──
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+if (csrfToken) {
+    document.querySelectorAll('form').forEach(f => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'csrf_token';
+        input.value = csrfToken;
+        f.appendChild(input);
+    });
+    const origFetch = window.fetch;
+    window.fetch = function(url, opts = {}) {
+        if (!opts.headers) opts.headers = {};
+        opts.headers['X-CSRFToken'] = csrfToken;
+        return origFetch(url, opts);
+    };
+    const origXhr = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function() {
+        this.addEventListener('readystatechange', function() {
+            if (this.readyState === 1) {
+                this.setRequestHeader('X-CSRFToken', csrfToken);
+            }
+        });
+        return origXhr.apply(this, arguments);
+    };
+}
+
+async function atualizarNotif() {
+    try {
+        const r = await fetch('/notificacoes/contar');
+        const d = await r.json();
+        const badge = document.getElementById('notif-badge');
+        if (badge) {
+            badge.textContent = d.total;
+            badge.style.display = d.total > 0 ? '' : 'none';
+        }
+    } catch(e) {}
+}
+atualizarNotif();
+setInterval(atualizarNotif, 60000);
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

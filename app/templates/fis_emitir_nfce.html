@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-plus-lg"></i> Emitir NFC-e</h4>
+<div class="card card-dash"><div class="card-body">
+<form method="POST">
+    <div class="mb-3"><label class="form-label">Venda</label>
+        <select name="venda_id" class="form-select" required>
+            <option value="">Selecione uma venda...</option>
+            {% for v in vendas %}
+            <option value="{{ v.id }}">Venda #{{ v.numero }} - R$ {{ "%.2f"|format(v.total|float) }} - {{ v.created_at.strftime('%d/%m/%Y') }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="mb-3"><label class="form-label">Cliente (opcional para NFC-e)</label>
+        <select name="cliente_id" class="form-select"><option value="">Consumidor Final</option>{% for v in vendas %}{% if v.cliente %}<option value="{{ v.cliente.id }}">{{ v.cliente.nome }} - {{ v.cliente.cpf_cnpj }}</option>{% endif %}{% endfor %}</select>
+    </div>
+    <p class="text-muted">Serie {{ config.serie_nfce }} | Proximo numero: {{ config.proximo_numero_nfce }}</p>
+    <button type="submit" class="btn btn-success"><i class="bi bi-send"></i> Emitir NFC-e</button>
+    <a href="{{ url_for('fiscal.dashboard') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+</div></div>
+{% endblock %}

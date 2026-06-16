@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Contabilidade{% endblock %}
+{% block content %}
+<h2><i class="bi bi-calculator"></i> Contabilidade</h2>
+<hr>
+<div class="row">
+    <div class="col-md-3 mb-3">
+        <div class="card card-dash">
+            <div class="card-body">
+                <div class="num">{{ total_contas }}</div>
+                <div class="rot">Contas Contábeis</div>
+                <i class="bi bi-journal-text icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card card-dash">
+            <div class="card-body">
+                <div class="num">{{ total_lancamentos }}</div>
+                <div class="rot">Lançamentos</div>
+                <i class="bi bi-list-check icon"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if grupos %}
+<h4 class="mt-3">Balanço por Grupo</h4>
+<div class="row">
+    {% for nome, saldo in grupos.items() %}
+    <div class="col-md-4 mb-2">
+        <div class="card {% if saldo >= 0 %}border-success{% else %}border-danger{% endif %}">
+            <div class="card-body py-2">
+                <small class="text-muted">{{ nome }}</small>
+                <div class="fs-5 {% if saldo >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    R$ {{ saldo|round(2) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-header bg-primary text-white"><i class="bi bi-journal-text"></i> Plano de Contas</div>
+            <div class="card-body">
+                <p>Gerencie as contas contábeis do plano de contas.</p>
+                <a href="{{ url_for('contabilidade.plano_contas') }}" class="btn btn-primary">Acessar</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-header bg-success text-white"><i class="bi bi-list-check"></i> Lançamentos</div>
+            <div class="card-body">
+                <p>Registre lançamentos contábeis em partidas dobradas.</p>
+                <a href="{{ url_for('contabilidade.lancamentos') }}" class="btn btn-success">Acessar</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-header bg-info text-white"><i class="bi bi-file-text"></i> ECD - SPED Contábil</div>
+            <div class="card-body">
+                <p>Gere o arquivo da Escrituração Contábil Digital.</p>
+                <a href="{{ url_for('contabilidade.ecd_gerar') }}" class="btn btn-info text-white">Gerar ECD</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-header bg-warning text-dark"><i class="bi bi-file-earmark-text"></i> ECF</div>
+            <div class="card-body">
+                <p>Gere o arquivo da Escrituração Contábil Fiscal.</p>
+                <a href="{{ url_for('contabilidade.ecf_gerar') }}" class="btn btn-warning">Gerar ECF</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

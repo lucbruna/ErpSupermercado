@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Plano de Contas{% endblock %}
+{% block content %}
+<h2><i class="bi bi-journal-text"></i> Plano de Contas</h2>
+<hr>
+<a href="{{ url_for('contabilidade.plano_contas_novo') }}" class="btn btn-primary mb-3"><i class="bi bi-plus-lg"></i> Nova Conta</a>
+<table class="table table-hover table-sm">
+    <thead>
+        <tr>
+            <th>Código</th>
+            <th>Descrição</th>
+            <th>Tipo</th>
+            <th>Natureza</th>
+            <th>Nível</th>
+            <th>Conta Pai</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for c in contas %}
+        <tr>
+            <td><code>{{ c.codigo }}</code></td>
+            <td>{{ c.descricao }}</td>
+            <td>{{ c.tipo }}</td>
+            <td>{{ 'Devedora' if c.natureza == 'D' else 'Credora' }}</td>
+            <td>{{ c.nivel }}</td>
+            <td>{{ c.conta_pai.codigo + ' - ' + c.conta_pai.descricao if c.conta_pai else '-' }}</td>
+            <td>
+                <a href="{{ url_for('contabilidade.plano_contas_editar', id=c.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Gerencial{% endblock %}
+{% block content %}
+<h2><i class="bi bi-speedometer2"></i> Dashboard Gerencial</h2>
+<hr>
+
+<div class="row mb-3">
+    <div class="col-md-3">
+        <div class="card border-primary">
+            <div class="card-body">
+                <small class="text-muted">Vendas no Mês</small>
+                <div class="fs-4 fw-bold" id="g-vendas-mes">-</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-success">
+            <div class="card-body">
+                <small class="text-muted">Qtd Vendas</small>
+                <div class="fs-4 fw-bold" id="g-qtd-mes">-</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-info">
+            <div class="card-body">
+                <small class="text-muted">Ticket Médio</small>
+                <div class="fs-4 fw-bold" id="g-ticket">-</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card" id="g-cresc-card">
+            <div class="card-body">
+                <small class="text-muted">Crescimento vs Mês Ant.</small>
+                <div class="fs-4 fw-bold" id="g-crescimento">-</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-header bg-dark text-white">Vendas por Hora (Hoje)</div>
+            <div class="card-body">
+                <canvas id="chartVendasHora" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card">
+            <div class="card-header bg-dark text-white">Formas de Pagamento</div>
+            <div class="card-body">
+                <canvas id="chartFormas" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card">
+            <div class="card-header bg-dark text-white">Top 10 Produtos</div>
+            <div class="card-body">
+                <canvas id="chartTopProd" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-header bg-dark text-white">Margem por Grupo</div>
+            <div class="card-body">
+                <canvas id="chartMargem" height="220"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-header bg-dark text-white">Projeção Fluxo de Caixa (30 dias)</div>
+            <div class="card-body">
+                <canvas id="chartFluxo" height="220"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-header bg-dark text-white">Ano vs Ano Anterior</div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <small class="text-muted">Crescimento Anual: </small><strong id="g-cresc-anual">-</strong>
+                </div>
+                <canvas id="chartAnoAnterior" height="220"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card">
+            <div class="card-header bg-dark text-white">Meta vs Real (Vendedores)</div>
+            <div class="card-body">
+                <canvas id="chartMetas" height="220"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+async function carregar() {
+    const r = await fetch('{{ url_for("relatorios.dados_dashboard_gerencial") }}');
+    const d = await r.json();
+    document.getElementById('g-vendas-mes').textContent = 'R$ ' + d.vendas_mes.toFixed(2);
+    document.getElementById('g-qtd-mes').textContent = d.qtd_mes;
+    document.getElementById('g-ticket').textContent = 'R$ ' + d.ticket_medio.toFixed(2);
+    var crescEl = document.getElementById('g-crescimento');
+    crescEl.textContent = d.crescimento + '%';
+    crescEl.className = 'fs-4 fw-bold ' + (d.crescimento >= 0 ? 'text-success' : 'text-danger');
+    document.getElementById('g-cresc-card').className = 'card border-' + (d.crescimento >= 0 ? 'success' : 'danger');
+
+    new Chart(document.getElementById('chartVendasHora'), {
+        type: 'bar',
+        data: { labels: d.vendas_hora.labels, datasets: [{ label: 'R$', data: d.vendas_hora.valores, backgroundColor: '#0d6efd' }] },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+    new Chart(document.getElementById('chartFormas'), {
+        type: 'doughnut',
+        data: { labels: d.formas_pagamento.labels, datasets: [{ data: d.formas_pagamento.valores, backgroundColor: ['#0d6efd','#198754','#ffc107','#dc3545','#6f42c1','#fd7e14'] }] },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+    new Chart(document.getElementById('chartTopProd'), {
+        type: 'bar',
+        data: { labels: d.top_produtos.labels, datasets: [{ label: 'R$', data: d.top_produtos.valores, backgroundColor: '#198754' }] },
+        options: { responsive: true, indexAxis: 'y', plugins: { legend: { display: false } } }
+    });
+    new Chart(document.getElementById('chartMargem'), {
+        type: 'bar',
+        data: { labels: d.margem_grupo.labels, datasets: [{ label: 'Margem R$', data: d.margem_grupo.valores, backgroundColor: '#6f42c1' }] },
+        options: { responsive: true, indexAxis: 'y', plugins: { legend: { display: false } } }
+    });
+    new Chart(document.getElementById('chartFluxo'), {
+        type: 'line',
+        data: {
+            labels: d.fluxo_caixa.labels,
+            datasets: [
+                { label: 'Entradas', data: d.fluxo_caixa.entradas, borderColor: '#198754', fill: false },
+                { label: 'Saídas', data: d.fluxo_caixa.saidas, borderColor: '#dc3545', fill: false },
+                { label: 'Saldo', data: d.fluxo_caixa.saldo, borderColor: '#0d6efd', fill: false, borderDash: [5,5] },
+            ]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+
+    const r2 = await fetch('{{ url_for("relatorios.dados_ano_anterior") }}');
+    const d2 = await r2.json();
+    document.getElementById('g-cresc-anual').textContent = d2.crescimento_anual + '%';
+    document.getElementById('g-cresc-anual').className = d2.crescimento_anual >= 0 ? 'text-success' : 'text-danger';
+    new Chart(document.getElementById('chartAnoAnterior'), {
+        type: 'bar',
+        data: {
+            labels: d2.labels,
+            datasets: [
+                { label: d2.labels.length > 6 ? String(new Date().getFullYear()) : String(new Date().getFullYear()), data: d2.atual, backgroundColor: '#0d6efd' },
+                { label: String(new Date().getFullYear() - 1), data: d2.passado, backgroundColor: '#adb5bd' },
+            ]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+
+    const r3 = await fetch('{{ url_for("relatorios.dados_metas") }}');
+    const d3 = await r3.json();
+    new Chart(document.getElementById('chartMetas'), {
+        type: 'bar',
+        data: {
+            labels: d3.labels,
+            datasets: [
+                { label: 'Meta', data: d3.meta, backgroundColor: '#ffc107' },
+                { label: 'Real', data: d3.real, backgroundColor: '#198754' },
+            ]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+}
+carregar();
+</script>
+{% endblock %}

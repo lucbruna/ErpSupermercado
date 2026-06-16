@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+.sangria-card {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border-radius: 14px; padding: 20px; margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.15); color: #fff;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+}
+.sangria-card .info { display: flex; gap: 24px; flex-wrap: wrap; font-size: .85rem; }
+.sangria-card .info span { display: inline-flex; align-items: center; gap: 6px; }
+.sangria-card .info i { color: #4e8cff; }
+.sangria-card .total-sangria { color: #ef4444; font-weight: 700; font-size: 1.1rem; }
+
+.sangria-table-card {
+    background: #fff; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,.06);
+    overflow: hidden;
+}
+.sangria-table-card table { font-size: .85rem; margin: 0; }
+.sangria-table-card thead th {
+    background: #f8fafc; padding: 10px 14px; font-weight: 600;
+    color: #475569; border-bottom: 2px solid #e2e8f0;
+}
+.sangria-table-card tbody td { padding: 8px 14px; vertical-align: middle; }
+.sangria-table-card tbody tr:hover { background: #f8fafc; }
+.badge-motivo { background: #f1f5f9; color: #475569; padding: 2px 10px; border-radius: 20px; font-size: .78rem; }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="bi bi-cash-stack me-2"></i>Sangrias do Caixa</h4>
+    <a href="{{ url_for('pdv.index') }}" class="btn btn-primary px-3" style="border-radius:10px;font-weight:600">
+        <i class="bi bi-arrow-left"></i> PDV
+    </a>
+</div>
+
+{% if caixa %}
+<div class="sangria-card">
+    <div class="info">
+        <span><i class="bi bi-person-fill"></i>{{ current_user.nome }}</span>
+        <span><i class="bi bi-hash"></i>Caixa #{{ caixa.numero }}</span>
+        <span><i class="bi bi-box-arrow-in-right"></i>Abertura: R$ {{ "%.2f"|format(caixa.valor_abertura|float) }}</span>
+    </div>
+    <div class="total-sangria">Total: - R$ {{ "%.2f"|format(total_sangrias) }}</div>
+</div>
+
+<div class="sangria-table-card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Data/Hora</th>
+                <th>Operador</th>
+                <th>Valor</th>
+                <th>Motivo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in sangrias %}
+            <tr>
+                <td>{{ s.id }}</td>
+                <td>{{ s.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td>{{ s.usuario.nome }}</td>
+                <td class="text-danger fw-bold">- R$ {{ "%.2f"|format(s.valor|float) }}</td>
+                <td><span class="badge-motivo">{{ s.motivo or '—' }}</span></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="text-center text-muted py-4">Nenhuma sangria registrada neste caixa</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-warning d-flex align-items-center gap-2" style="border-radius:10px">
+    <i class="bi bi-exclamation-triangle"></i> Nenhum caixa aberto no momento.
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-file-text"></i> Gerar Folha de Pagamento</h4>
+<div class="card card-dash"><div class="card-body">
+<form method="POST">
+    <div class="row">
+        <div class="col-md-4 mb-3"><label class="form-label">Competencia (MM/AAAA)</label><input type="text" name="competencia" class="form-control" placeholder="01/2026" required></div>
+    </div>
+    <p>Funcionarios ativos: <strong>{{ funcionarios|length }}</strong></p>
+    <button type="submit" class="btn btn-primary" onclick="return confirm('Gerar folha para {{ funcionarios|length }} funcionarios?')"><i class="bi bi-gear"></i> Gerar Folha</button>
+    <a href="{{ url_for('rh.lista_folhas') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+</div></div>
+{% endblock %}

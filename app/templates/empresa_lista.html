@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="bi bi-building"></i> Empresa</h4>
+    <a href="{{ url_for('cadastros.nova_empresa') }}" class="btn btn-warning"><i class="bi bi-plus-lg"></i> Nova</a>
+</div>
+<div class="card card-dash">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr><th>Razão Social</th><th>CNPJ</th><th>Cidade</th><th>UF</th><th>Regime</th><th>Ações</th></tr>
+            </thead>
+            <tbody>
+                {% for e in empresas %}
+                <tr>
+                    <td>{{ e.razao_social }}{% if e.nome_fantasia %} ({{ e.nome_fantasia }}){% endif %}</td>
+                    <td>{{ e.cnpj }}</td>
+                    <td>{{ e.cidade or '-' }}</td>
+                    <td>{{ e.uf or '-' }}</td>
+                    <td>{{ {'1':'Simples','2':'Lucro Pres.','3':'Lucro Real'}.get(e.regime_tributario, '-') }}</td>
+                    <td>
+                        <a href="{{ url_for('cadastros.editar_empresa', id=e.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-center text-muted py-4">Nenhuma empresa cadastrada</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Conciliações{% endblock %}
+{% block content %}
+<h2><i class="bi bi-arrow-left-right"></i> Conciliações Bancárias</h2>
+<hr>
+<a href="{{ url_for('financeiro.nova_conciliacao') }}" class="btn btn-primary mb-3"><i class="bi bi-plus-lg"></i> Nova Conciliação</a>
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Data</th>
+                <th>Arquivo</th>
+                <th>Linhas</th>
+                <th>Conciliado</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in conciliacoes %}
+            <tr>
+                <td>{{ c.id }}</td>
+                <td>{{ c.data.strftime('%d/%m/%Y') }}</td>
+                <td>{{ c.arquivo_nome or '-' }}</td>
+                <td>{{ c.total_linhas }}</td>
+                <td>{{ c.total_conciliado }}/{{ c.total_linhas }}</td>
+                <td>
+                    {% if c.status == 'A' %}
+                    <span class="badge bg-warning text-dark">Aberta</span>
+                    {% else %}
+                    <span class="badge bg-secondary">Fechada</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('financeiro.detalhe_conciliacao', id=c.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-search"></i></a>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7" class="text-center text-muted">Nenhuma conciliação.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

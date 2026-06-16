@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card card-dash">
+            <div class="card-body">
+                <i class="bi bi-people icon"></i>
+                <div class="rot">Funcionarios Ativos</div>
+                <div class="num">{{ stats.funcionarios }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-dash">
+            <div class="card-body">
+                <i class="bi bi-briefcase icon"></i>
+                <div class="rot">Cargos</div>
+                <div class="num">{{ stats.cargos }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-dash">
+            <div class="card-body">
+                <i class="bi bi-file-text icon"></i>
+                <div class="rot">Folhas Pendentes</div>
+                <div class="num">{{ stats.folhas_pendentes }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card card-dash">
+            <div class="card-body">
+                <h5>RH - Recursos Humanos</h5>
+                <p class="text-muted">Gerencie funcionarios, cargos, folha de pagamento e ponto eletronico.</p>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('rh.lista_funcionarios') }}" class="btn btn-primary"><i class="bi bi-people"></i> Funcionarios</a>
+                    <a href="{{ url_for('rh.lista_cargos') }}" class="btn btn-info"><i class="bi bi-briefcase"></i> Cargos</a>
+                    <a href="{{ url_for('rh.lista_folhas') }}" class="btn btn-warning"><i class="bi bi-file-text"></i> Folha</a>
+                    <a href="{{ url_for('rh.lista_ponto') }}" class="btn btn-secondary"><i class="bi bi-clock"></i> Ponto</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

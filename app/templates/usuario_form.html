@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-{% if usuario %}pencil{% else %}plus-circle{% endif %}"></i> {{ 'Editar' if usuario else 'Novo' }} Usuario</h4>
+<div class="card card-dash">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Nome *</label>
+                    <input type="text" name="nome" class="form-control" value="{{ usuario.nome if usuario else '' }}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Login *</label>
+                    <input type="text" name="login" class="form-control" value="{{ usuario.login if usuario else '' }}" {% if usuario %}readonly{% endif %} required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Senha {% if usuario %}(deixe em branco para manter){% endif %} *</label>
+                    <input type="password" name="senha" class="form-control" {% if not usuario %}required{% endif %}>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Papel</label>
+                    <select name="papel" class="form-select" {{ 'disabled' if current_user.papel != 'admin' }}>
+                        {% if current_user.papel == 'admin' %}
+                        <option value="funcionario" {{ 'selected' if usuario and usuario.papel == 'funcionario' }}>Funcionario</option>
+                        <option value="chefe_setor" {{ 'selected' if usuario and usuario.papel == 'chefe_setor' }}>Chefe de Setor</option>
+                        <option value="admin" {{ 'selected' if usuario and usuario.papel == 'admin' }}>Admin</option>
+                        {% else %}
+                        <option value="funcionario" selected>Funcionario</option>
+                        {% endif %}
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Setor</label>
+                    <select name="setor_id" class="form-select" {{ 'disabled' if current_user.papel == 'chefe_setor' }}>
+                        <option value="">Selecione</option>
+                        {% for s in setores %}
+                        <option value="{{ s.id }}" {{ 'selected' if (usuario and usuario.setor_id == s.id) or (current_user.papel == 'chefe_setor' and current_user.setor_id == s.id) }}>{{ s.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            {% if usuario %}
+            <div class="mb-3 form-check">
+                <input type="checkbox" name="ativo" class="form-check-input" id="chkAtivo" {{ 'checked' if usuario.ativo }}>
+                <label class="form-check-label" for="chkAtivo">Usuario Ativo</label>
+            </div>
+            {% endif %}
+            <button type="submit" class="btn btn-primary">Salvar</button>
+            <a href="{{ url_for('usuarios.lista') }}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

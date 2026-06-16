@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Filiais{% endblock %}
+{% block content %}
+<h2><i class="bi bi-building"></i> Filiais</h2>
+<hr>
+<a href="{{ url_for('transferencias.nova_filial') }}" class="btn btn-primary mb-3"><i class="bi bi-plus-lg"></i> Nova Filial</a>
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <thead class="table-dark">
+            <tr><th>Nome</th><th>CNPJ</th><th>Cidade</th><th>UF</th><th>Ativo</th></tr>
+        </thead>
+        <tbody>
+            {% for f in filiais %}
+            <tr>
+                <td>{{ f.nome }}</td>
+                <td>{{ f.cnpj or '-' }}</td>
+                <td>{{ f.cidade or '-' }}</td>
+                <td>{{ f.uf or '-' }}</td>
+                <td><span class="badge bg-{{ 'success' if f.ativo else 'secondary' }}">{{ 'Sim' if f.ativo else 'Não' }}</span></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="text-center text-muted">Nenhuma filial cadastrada.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

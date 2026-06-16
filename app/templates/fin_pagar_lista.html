@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="bi bi-arrow-down text-danger"></i> Contas a Pagar</h4>
+    <a href="{{ url_for('financeiro.nova_conta_pagar') }}" class="btn btn-danger"><i class="bi bi-plus-lg"></i> Nova</a>
+</div>
+<div class="card card-dash"><div class="card-body p-0">
+    <table class="table table-hover mb-0">
+        <thead class="table-light"><tr><th>Descricao</th><th>Fornecedor</th><th>Valor</th><th>Vencimento</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+            {% for c in contas %}
+            <tr class="{{ 'table-danger' if not c.pago and c.data_vencimento < hoje }}">
+                <td>{{ c.descricao }}</td>
+                <td>{{ c.fornecedor.nome if c.fornecedor else '-' }}</td>
+                <td>R$ {{ "%.2f"|format(c.valor|float) }}</td>
+                <td>{{ c.data_vencimento.strftime('%d/%m/%Y') }}</td>
+                <td>{% if c.pago %}<span class="badge bg-success">Pago</span>{% elif c.data_vencimento < hoje %}<span class="badge bg-danger">Vencido</span>{% else %}<span class="badge bg-warning">A vencer</span>{% endif %}</td>
+                <td>
+                    {% if not c.pago %}
+                    <button class="btn btn-sm btn-success" onclick="baixar({{ c.id }}, '{{ c.descricao }}', {{ c.valor }})"><i class="bi bi-check-lg"></i> Baixar</button>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" class="text-center text-muted py-4">Nenhuma conta a pagar</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div></div>
+<div class="modal fade" id="modalBaixa" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title">Baixar Conta</h5></div>
+    <form method="POST" id="formBaixa">
+        <div class="modal-body">
+            <p id="baixaDesc"></p>
+            <div class="mb-3"><label class="form-label">Data Pagamento</label><input type="date" name="data_pagamento" class="form-control" value="{{ hoje.strftime('%Y-%m-%d') }}"></div>
+            <div class="mb-3"><label class="form-label">Valor Pago</label><input type="number" name="valor_pago" class="form-control" step="0.01" id="baixaValor"></div>
+        </div>
+        <div class="modal-footer"><button type="submit" class="btn btn-success">Confirmar</button></div>
+    </form>
+</div></div></div>
+<script>
+function baixar(id, desc, valor) {
+    document.getElementById('baixaDesc').textContent = desc;
+    document.getElementById('baixaValor').value = valor;
+    document.getElementById('formBaixa').action = '/financeiro/pagar/baixar/' + id;
+    document.getElementById('modalBaixa').classList.add('show');
+}
+</script>
+{% endblock %}

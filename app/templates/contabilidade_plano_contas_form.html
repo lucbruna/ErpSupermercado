@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar' if conta else 'Nova' }} Conta Contábil{% endblock %}
+{% block content %}
+<h2><i class="bi bi-journal-text"></i> {{ 'Editar' if conta else 'Nova' }} Conta Contábil</h2>
+<hr>
+<form method="POST">
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Código</label>
+            <input type="text" name="codigo" class="form-control" value="{{ conta.codigo if conta else '' }}" required>
+        </div>
+        <div class="col-md-8 mb-3">
+            <label class="form-label">Descrição</label>
+            <input type="text" name="descricao" class="form-control" value="{{ conta.descricao if conta else '' }}" required>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Tipo</label>
+            <select name="tipo" class="form-select" required>
+                <option value="A" {{ 'selected' if conta and conta.tipo == 'A' else '' }}>Ativo</option>
+                <option value="P" {{ 'selected' if conta and conta.tipo == 'P' else '' }}>Passivo</option>
+                <option value="PL" {{ 'selected' if conta and conta.tipo == 'PL' else '' }}>Patrimônio Líquido</option>
+                <option value="R" {{ 'selected' if conta and conta.tipo == 'R' else '' }}>Receita</option>
+                <option value="D" {{ 'selected' if conta and conta.tipo == 'D' else '' }}>Despesa</option>
+            </select>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Natureza</label>
+            <select name="natureza" class="form-select" required>
+                <option value="D" {{ 'selected' if conta and conta.natureza == 'D' else '' }}>Devedora</option>
+                <option value="C" {{ 'selected' if conta and conta.natureza == 'C' else '' }}>Credora</option>
+            </select>
+        </div>
+        <div class="col-md-2 mb-3">
+            <label class="form-label">Nível</label>
+            <input type="number" name="nivel" class="form-control" value="{{ conta.nivel if conta else 1 }}" min="1" max="5">
+        </div>
+        <div class="col-md-2 mb-3">
+            <label class="form-label">Grupo</label>
+            <select name="grupo" class="form-select">
+                <option value="">---</option>
+                <option value="01" {{ 'selected' if conta and conta.grupo == '01' else '' }}>Ativo Circulante</option>
+                <option value="02" {{ 'selected' if conta and conta.grupo == '02' else '' }}>Ativo Não Circulante</option>
+                <option value="03" {{ 'selected' if conta and conta.grupo == '03' else '' }}>Passivo Circulante</option>
+                <option value="04" {{ 'selected' if conta and conta.grupo == '04' else '' }}>Passivo Não Circulante</option>
+                <option value="05" {{ 'selected' if conta and conta.grupo == '05' else '' }}>Patrimônio Líquido</option>
+                <option value="06" {{ 'selected' if conta and conta.grupo == '06' else '' }}>Receitas</option>
+                <option value="07" {{ 'selected' if conta and conta.grupo == '07' else '' }}>Despesas</option>
+            </select>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Conta Pai (sintética)</label>
+        <select name="conta_pai_id" class="form-select">
+            <option value="">--- Nenhuma ---</option>
+            {% for cp in contas_pai %}
+            <option value="{{ cp.id }}" {{ 'selected' if conta and conta.conta_pai_id == cp.id else '' }}>{{ cp.codigo }} - {{ cp.descricao }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Salvar</button>
+    <a href="{{ url_for('contabilidade.plano_contas') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

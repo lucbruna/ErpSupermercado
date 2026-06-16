@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Metas Calculadas{% endblock %}
+{% block content %}
+<h2><i class="bi bi-calculator"></i> Metas Calculadas - {{ mes }}/{{ ano }}</h2>
+<hr>
+<table class="table table-sm table-hover">
+    <thead class="table-dark">
+        <tr><th>Vendedor</th><th>Meta R$</th><th>Atingido R$</th><th>%</th><th>Resultado</th></tr>
+    </thead>
+    <tbody>
+        {% for r in resultados %}
+        <tr class="{{ 'table-success' if r.atingiu else 'table-danger' }}">
+            <td>{{ r.meta.usuario.nome }}</td>
+            <td>R$ {{ "%.2f"|format(r.meta.valor_meta|float) }}</td>
+            <td>R$ {{ "%.2f"|format(r.total_vendas|float) }}</td>
+            <td>{{ "%.1f"|format(r.total_vendas / r.meta.valor_meta * 100 if r.meta.valor_meta else 0) }}%</td>
+            <td>{% if r.atingiu %}<span class="badge bg-success">Atingiu</span>{% else %}<span class="badge bg-danger">Não atingiu</span>{% endif %}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="text-center text-muted">Nenhuma meta para este período.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{{ url_for('crm.metas') }}" class="btn btn-secondary">Voltar</a>
+{% endblock %}

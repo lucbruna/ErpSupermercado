@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-file-earmark-text"></i> Orçamentos</h4>
+<div class="d-flex justify-content-between mb-3">
+    <span></span>
+    <a href="{{ url_for('orcamentos.novo') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i> Novo Orçamento</a>
+</div>
+<div class="card card-dash p-0">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr><th>#</th><th>Cliente</th><th>Data</th><th>Validade</th><th>Total</th><th>Status</th><th>Ações</th></tr>
+            </thead>
+            <tbody>
+                {% for o in orcamentos %}
+                <tr>
+                    <td>{{ o.numero }}</td>
+                    <td>{{ o.cliente.nome if o.cliente else 'Consumidor' }}</td>
+                    <td>{{ o.data_orcamento.strftime('%d/%m/%Y') }}</td>
+                    <td>{{ o.data_validade.strftime('%d/%m/%Y') if o.data_validade else '-' }}</td>
+                    <td>R$ {{ '%.2f'|format(o.total) }}</td>
+                    <td><span class="badge bg-{{ 'secondary' if o.status=='01' else 'success' if o.status=='02' else 'info' if o.status=='03' else 'danger' }}">{{ orc_status[o.status] }}</span></td>
+                    <td>
+                        <a href="{{ url_for('orcamentos.visualizar', id=o.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="text-center py-4 text-muted">Nenhum orçamento encontrado.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

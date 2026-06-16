@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-plus-circle text-success"></i> Entrada de Estoque</h4>
+<div class="card card-dash">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Produto *</label>
+                    <select name="produto_id" class="form-select" required id="selProduto">
+                        <option value="">Selecione o produto</option>
+                        {% for p in produtos %}
+                        <option value="{{ p.id }}" data-lote="{{ 'S' if p.controla_lote else 'N' }}" data-preco="{{ p.preco_custo }}">{{ p.nome }} (Est: {{ p.estoque_atual }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Quantidade *</label>
+                    <input type="number" name="quantidade" class="form-control" step="0.001" required>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Preço Unitário</label>
+                    <input type="number" name="preco_unitario" class="form-control" step="0.01" value="0">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Fornecedor</label>
+                    <select name="fornecedor_id" class="form-select">
+                        <option value="">Selecione</option>
+                        {% for f in fornecedores %}
+                        <option value="{{ f.id }}">{{ f.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Documento (NF/Pedido)</label>
+                    <input type="text" name="documento" class="form-control">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Motivo</label>
+                    <input type="text" name="motivo" class="form-control" placeholder="Ex: Compra, Devolução">
+                </div>
+            </div>
+            <div class="row" id="loteRow" style="display:none;">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Código Lote</label>
+                    <input type="text" name="lote_codigo" class="form-control">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Data Validade</label>
+                    <input type="date" name="data_validade" class="form-control">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success">Registrar Entrada</button>
+            <a href="{{ url_for('estoque.movimentacoes') }}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+<script>
+document.getElementById('selProduto').addEventListener('change', function(){
+    var opt = this.options[this.selectedIndex];
+    document.getElementById('loteRow').style.display = opt.dataset.lote === 'S' ? '' : 'none';
+});
+</script>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Gestão de Ativos{% endblock %}
+{% block content %}
+<h2><i class="bi bi-tools"></i> Gestão de Ativos</h2>
+<hr>
+<a href="{{ url_for('ativos.novo') }}" class="btn btn-primary mb-3"><i class="bi bi-plus-lg"></i> Novo Ativo</a>
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <thead class="table-dark">
+            <tr><th>Nome</th><th>Tipo</th><th>Patrimônio</th><th>Valor Aquisição</th><th>Data Aquisição</th><th>Ativo</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+            {% for a in ativos %}
+            <tr>
+                <td>{{ a.nome }}</td>
+                <td><span class="badge bg-info">{{ a.tipo or '-' }}</span></td>
+                <td>{{ a.patrimonio or '-' }}</td>
+                <td>R$ {{ "%.2f"|format(a.valor_aquisicao|float) if a.valor_aquisicao else '0.00' }}</td>
+                <td>{{ a.data_aquisicao.strftime('%d/%m/%Y') if a.data_aquisicao else '-' }}</td>
+                <td><span class="badge bg-{{ 'success' if a.ativo else 'secondary' }}">{{ 'Sim' if a.ativo else 'Não' }}</span></td>
+                <td>
+                    <a href="{{ url_for('ativos.editar', id=a.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                    {% if a.ativo %}
+                    <form method="POST" action="{{ url_for('ativos.desativar', id=a.id) }}" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Desativar ativo?')"><i class="bi bi-x-lg"></i></button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7" class="text-center text-muted">Nenhum ativo cadastrado.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

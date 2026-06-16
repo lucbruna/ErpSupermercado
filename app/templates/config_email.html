@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Configuração de Email{% endblock %}
+{% block content %}
+<h2><i class="bi bi-envelope"></i> Configuração de Email (SMTP)</h2>
+<hr>
+<p class="text-muted">Configure o servidor SMTP para envio de cotações e notificações.</p>
+<form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Servidor SMTP</label>
+            <input type="text" name="smtp_host" class="form-control" value="{{ configs.get('smtp_host', 'smtp.gmail.com') }}" placeholder="smtp.gmail.com">
+        </div>
+        <div class="col-md-2 mb-3">
+            <label class="form-label">Porta</label>
+            <input type="number" name="smtp_port" class="form-control" value="{{ configs.get('smtp_port', '587') }}" placeholder="587">
+        </div>
+        <div class="col-md-2 mb-3 d-flex align-items-end">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="smtp_tls" value="1" id="smtp_tls" {% if configs.get('smtp_tls', '1') == '1' %}checked{% endif %}>
+                <label class="form-check-label" for="smtp_tls">TLS</label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Usuário</label>
+            <input type="text" name="smtp_user" class="form-control" value="{{ configs.get('smtp_user', '') }}" placeholder="seu@email.com">
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Senha</label>
+            <input type="password" name="smtp_pass" class="form-control" value="{{ configs.get('smtp_pass', '') }}" placeholder="senha de aplicativo">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Email Remetente</label>
+            <input type="email" name="from_email" class="form-control" value="{{ configs.get('from_email', '') }}" placeholder="deixe vazio para usar o usuário">
+        </div>
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Nome do Remetente</label>
+            <input type="text" name="from_name" class="form-control" value="{{ configs.get('from_name', 'ERP Supermercado') }}">
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Salvar</button>
+    <button type="submit" name="testar" value="1" class="btn btn-outline-info"><i class="bi bi-send"></i> Salvar e Testar</button>
+    <a href="javascript:history.back()" class="btn btn-secondary">Voltar</a>
+</form>
+{% endblock %}

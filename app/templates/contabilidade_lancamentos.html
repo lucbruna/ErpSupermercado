@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Lançamentos Contábeis{% endblock %}
+{% block content %}
+<h2><i class="bi bi-list-check"></i> Lançamentos Contábeis</h2>
+<hr>
+<a href="{{ url_for('contabilidade.lancamentos_novo') }}" class="btn btn-success mb-3"><i class="bi bi-plus-lg"></i> Novo Lançamento</a>
+<table class="table table-hover table-sm">
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Histórico</th>
+            <th>Débito</th>
+            <th>Crédito</th>
+            <th>Valor</th>
+            <th>Lote</th>
+            <th>Documento</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for l in lancamentos %}
+        <tr>
+            <td>{{ l.data.strftime('%d/%m/%Y') }}</td>
+            <td>{{ l.historico[:80] }}{{ '...' if l.historico|length > 80 else '' }}</td>
+            <td><code>{{ l.conta_debito.codigo if l.conta_debito else '-' }}</code> {{ l.conta_debito.descricao[:40] if l.conta_debito else '' }}</td>
+            <td><code>{{ l.conta_credito.codigo if l.conta_credito else '-' }}</code> {{ l.conta_credito.descricao[:40] if l.conta_credito else '' }}</td>
+            <td class="text-end">R$ {{ l.valor|round(2) }}</td>
+            <td>{{ l.lote or '-' }}</td>
+            <td>{{ l.documento or '-' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

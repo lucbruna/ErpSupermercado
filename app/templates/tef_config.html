@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-credit-card"></i> TEF - Integração com Maquininha</h4>
+<div class="card card-dash p-3">
+    <form method="POST">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="modo_simulado" id="modo_simulado" {{ 'checked' if cfg.modo_simulado }}>
+                    <label class="form-check-label" for="modo_simulado">Modo Simulado (teste)</label>
+                </div>
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" name="ativo" id="ativo" {{ 'checked' if cfg.ativo }}>
+                    <label class="form-check-label" for="ativo">Ativo</label>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Adquirente</label>
+                <select name="adquirente" class="form-select">
+                    <option value="simulada" {{ 'selected' if cfg.adquirente=='simulada' }}>Simulada</option>
+                    <option value="rede" {{ 'selected' if cfg.adquirente=='rede' }}>Rede</option>
+                    <option value="cielo" {{ 'selected' if cfg.adquirente=='cielo' }}>Cielo</option>
+                    <option value="getnet" {{ 'selected' if cfg.adquirente=='getnet' }}>GetNet</option>
+                    <option value="stone" {{ 'selected' if cfg.adquirente=='stone' }}>Stone</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Código da Loja</label>
+                <input type="text" name="codigo_loja" class="form-control" value="{{ cfg.codigo_loja or '' }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Código do Terminal</label>
+                <input type="text" name="codigo_terminal" class="form-control" value="{{ cfg.codigo_terminal or '001' }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Caminho PINPAD</label>
+                <input type="text" name="caminho_pinpad" class="form-control" value="{{ cfg.caminho_pinpad or '' }}" placeholder="ex: COM1 ou /dev/ttyUSB0">
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">Salvar Configuração</button>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="card card-dash p-3 mt-3">
+    <h6>Informações</h6>
+    <ul class="text-muted small">
+        <li><strong>Modo Simulado:</strong> Processa pagamentos sem maquininha real (para testes).</li>
+        <li><strong>Modo Real:</strong> Requer integração com o software TEF da adquirente.</li>
+        <li>Para produção, implemente os métodos em <code>app/tef/cliente.py</code> conforme SDK da sua adquirente.</li>
+        <li>No PDV, ao selecionar pagamento CRÉDITO ou DÉBITO, o sistema chamará o TEF automaticamente.</li>
+    </ul>
+</div>
+{% endblock %}

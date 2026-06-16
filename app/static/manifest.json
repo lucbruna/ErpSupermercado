@@ -1,0 +1,14 @@
+{
+    "name": "ERP Supermercado",
+    "short_name": "ERP",
+    "description": "Sistema de gestão para supermercados",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#1a1a2e",
+    "theme_color": "#1a1a2e",
+    "orientation": "portrait",
+    "icons": [
+        { "src": "/static/icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" },
+        { "src": "/static/icons/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml" }
+    ]
+}

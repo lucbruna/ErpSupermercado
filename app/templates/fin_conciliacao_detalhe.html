@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Conciliação #{{ conciliacao.id }}{% endblock %}
+{% block content %}
+<h2><i class="bi bi-arrow-left-right"></i> Conciliação #{{ conciliacao.id }}
+    {% if conciliacao.status == 'A' %}
+    <span class="badge bg-warning text-dark">Aberta</span>
+    {% else %}
+    <span class="badge bg-secondary">Fechada</span>
+    {% endif %}
+</h2>
+<hr>
+<div class="row mb-3">
+    <div class="col-md-3"><strong>Data:</strong> {{ conciliacao.data.strftime('%d/%m/%Y') }}</div>
+    <div class="col-md-3"><strong>Arquivo:</strong> {{ conciliacao.arquivo_nome or '-' }}</div>
+    <div class="col-md-3"><strong>Progresso:</strong> {{ conciliacao.total_conciliado }}/{{ conciliacao.total_linhas }}</div>
+    <div class="col-md-3">
+        {% if conciliacao.status == 'A' %}
+        <form method="POST" action="{{ url_for('financeiro.fechar_conciliacao', id=conciliacao.id) }}" class="d-inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-success" onclick="return confirm('Fechar conciliação?')"><i class="bi bi-lock"></i> Fechar</button>
+        </form>
+        {% endif %}
+        <a href="{{ url_for('financeiro.lista_conciliacoes') }}" class="btn btn-sm btn-secondary">Voltar</a>
+    </div>
+</div>
+
+{% if pendentes %}
+<h5 class="text-warning">Pendentes ({{ pendentes|length }})</h5>
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Tipo</th>
+                <th>Descrição</th>
+                <th>Valor</th>
+                <th>Data</th>
+                <th>Documento</th>
+                <th>Conciliar com</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in pendentes %}
+            <tr>
+                <td><span class="badge {% if item.tipo == 'C' %}bg-success{% else %}bg-danger{% endif %}">{{ 'Crédito' if item.tipo == 'C' else 'Débito' }}</span></td>
+                <td>{{ item.descricao }}</td>
+                <td>R$ {{ item.valor }}</td>
+                <td>{{ item.data.strftime('%d/%m/%Y') if item.data else '-' }}</td>
+                <td>{{ item.documento or '-' }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('financeiro.conciliar_item', id=conciliacao.id, item_id=item.id) }}" class="d-flex gap-1">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <select name="tipo_destino" class="form-select form-select-sm" style="width:auto;">
+                            <option value="pagar">Conta Pagar</option>
+                            <option value="receber">Conta Receber</option>
+                        </select>
+                        <select name="destino_id" class="form-select form-select-sm" style="width:auto;">
+                            <option value="">-- Criar novo --</option>
+                            {% if item.tipo == 'D' %}
+                            {% for cp in a_pagar %}
+                            <option value="{{ cp.id }}">{{ cp.descricao[:40] }} - R$ {{ cp.valor }}</option>
+                            {% endfor %}
+                            {% endif %}
+                            {% if item.tipo == 'C' %}
+                            {% for cr in a_receber %}
+                            <option value="{{ cr.id }}">{{ cr.descricao[:40] }} - R$ {{ cr.valor }}</option>
+                            {% endfor %}
+                            {% endif %}
+                        </select>
+                        <button class="btn btn-sm btn-primary"><i class="bi bi-link"></i></button>
+                    </form>
+                </td>
+                <td>
+                    <span class="text-muted">pendente</span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% if conciliados %}
+<h5 class="text-success mt-3">Conciliados ({{ conciliados|length }})</h5>
+<div class="table-responsive">
+    <table class="table table-sm">
+        <thead class="table-success">
+            <tr>
+                <th>Tipo</th>
+                <th>Descrição</th>
+                <th>Valor</th>
+                <th>Conta</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in conciliados %}
+            <tr>
+                <td>{{ 'Crédito' if item.tipo == 'C' else 'Débito' }}</td>
+                <td>{{ item.descricao }}</td>
+                <td>R$ {{ item.valor }}</td>
+                <td>
+                    {% if item.conta_pagar %}{{ item.conta_pagar.descricao[:40] }}{% endif %}
+                    {% if item.conta_receber %}{{ item.conta_receber.descricao[:40] }}{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card card-dash">
+            <div class="card-body">
+                <i class="bi bi-people icon"></i>
+                <div class="rot">Total Clientes</div>
+                <div class="num">{{ total_clientes }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-dash">
+            <div class="card-body">
+                <i class="bi bi-stars icon"></i>
+                <div class="rot">Total Pontos</div>
+                <div class="num">{{ total_pontos }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-dash">
+            <div class="card-body">
+                <i class="bi bi-gift icon"></i>
+                <div class="rot">Total Resgates</div>
+                <div class="num">{{ total_resgates }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-8">
+        <div class="card card-dash">
+            <div class="card-header bg-transparent"><strong><i class="bi bi-clock-history"></i> Últimos Resgates</strong></div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr><th>Cliente</th><th>Pontos</th><th>Valor</th><th>Data</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for r in resgates %}
+                        <tr>
+                            <td>{{ r.cliente.nome }}</td>
+                            <td>{{ r.pontos }}</td>
+                            <td>R$ {{ "%.2f"|format(r.valor|float) }}</td>
+                            <td>{{ r.data_criacao.strftime('%d/%m/%Y %H:%M') if r.data_criacao else '-' }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="text-center text-muted py-4">Nenhum resgate</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-dash">
+            <div class="card-header bg-transparent"><strong><i class="bi bi-link"></i> Ações</strong></div>
+            <div class="card-body">
+                <div class="d-flex flex-column gap-2">
+                    <a href="{{ url_for('crm.clientes') }}" class="btn btn-primary"><i class="bi bi-people"></i> Clientes</a>
+                    <a href="{{ url_for('crm.metas') }}" class="btn btn-info"><i class="bi bi-bullseye"></i> Metas</a>
+                    <a href="{{ url_for('crm.config') }}" class="btn btn-secondary"><i class="bi bi-gear"></i> Config</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

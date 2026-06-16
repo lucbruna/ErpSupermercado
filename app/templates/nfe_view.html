@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}NF-e {{ doc.numero }}{% endblock %}
+{% block content %}
+<h2><i class="bi bi-file-earmark-text"></i> NF-e {{ doc.numero }}</h2>
+<hr>
+<div class="row">
+    <div class="col-md-6">
+        <table class="table table-sm">
+            <tr><th>Modelo</th><td>{{ doc.modelo }}</td></tr>
+            <tr><th>Série</th><td>{{ doc.serie }}</td></tr>
+            <tr><th>Número</th><td>{{ doc.numero }}</td></tr>
+            <tr><th>Chave de Acesso</th><td style="font-size:12px;word-break:break-all">{{ doc.chave_acesso }}</td></tr>
+            <tr><th>Status</th><td>
+                {% set cores = {'01':'secondary','02':'info','03':'warning','04':'success','05':'dark','99':'danger'} %}
+                {% set labels = {'01':'Digitando','02':'Assinado','03':'Transmitindo','04':'Autorizada','05':'Cancelada','99':'Rejeitada'} %}
+                <span class="badge bg-{{ cores.get(doc.status,'secondary') }}">{{ labels.get(doc.status, doc.status) }}</span>
+            </td></tr>
+            <tr><th>Protocolo</th><td>{{ doc.protocolo or '-' }}</td></tr>
+        </table>
+    </div>
+    <div class="col-md-6">
+        <table class="table table-sm">
+            <tr><th>Cliente</th><td>{{ doc.cliente.nome if doc.cliente else '-' }}</td></tr>
+            <tr><th>CPF/CNPJ</th><td>{{ doc.cliente.cpf_cnpj if doc.cliente else '-' }}</td></tr>
+            <tr><th>Valor Total</th><td>R$ {{ "%.2f"|format(doc.valor_total|float) }}</td></tr>
+            <tr><th>CFOP</th><td>{{ doc.cfop }}</td></tr>
+            <tr><th>Natureza</th><td>{{ doc.natureza_operacao }}</td></tr>
+            <tr><th>Emissão</th><td>{{ doc.data_emissao.strftime('%d/%m/%Y %H:%M') }}</td></tr>
+            {% if doc.data_autorizacao %}
+            <tr><th>Autorização</th><td>{{ doc.data_autorizacao.strftime('%d/%m/%Y %H:%M') }}</td></tr>
+            {% endif %}
+        </table>
+    </div>
+</div>
+
+<h5 class="mt-3">Itens</h5>
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <thead class="table-dark">
+            <tr><th>Produto</th><th>NCM</th><th>CFOP</th><th>Qtd</th><th>Vl Unit</th><th>Vl Total</th></tr>
+        </thead>
+        <tbody>
+            {% for item in doc.itens %}
+            <tr>
+                <td>{{ item.produto.nome if item.produto else '#' ~ item.produto_id }}</td>
+                <td>{{ item.ncm or '-' }}</td>
+                <td>{{ item.cfop or '-' }}</td>
+                <td>{{ "%.4f"|format(item.quantidade|float) }}</td>
+                <td>R$ {{ "%.2f"|format(item.valor_unitario|float) }}</td>
+                <td>R$ {{ "%.2f"|format(item.valor_total|float) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if doc.xml_assinado %}
+<h5 class="mt-3">XML</h5>
+<pre style="max-height:300px;overflow:auto;background:#f5f5f5;padding:10px;border-radius:5px;font-size:11px;">{{ doc.xml_assinado[:5000] }}{% if doc.xml_assinado|length > 5000 %}... (truncado){% endif %}</pre>
+{% endif %}
+
+<div class="mt-3">
+    <a href="{{ url_for('nfe.dashboard') }}" class="btn btn-secondary">Voltar</a>
+    {% if doc.status == '04' %}
+    <button class="btn btn-danger" onclick="cancelarNfe()">Cancelar NF-e</button>
+    {% endif %}
+</div>
+
+{% if doc.status == '04' %}
+<form id="formCancelar" method="POST" action="{{ url_for('nfe.cancelar', id=doc.id) }}" style="display:none">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="mt-2">
+        <label class="form-label">Justificativa (min 15 caracteres)</label>
+        <textarea name="justificativa" class="form-control" rows="2" required minlength="15"></textarea>
+        <button type="submit" class="btn btn-danger mt-1">Confirmar Cancelamento</button>
+    </div>
+</form>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+function cancelarNfe() {
+    document.getElementById('formCancelar').style.display = 'block';
+}
+</script>
+{% endblock %}

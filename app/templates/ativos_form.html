@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-plus-circle"></i> {% if ativo %}Editar{% else %}Novo{% endif %} Ativo</h4>
+<div class="card card-dash p-4">
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Nome *</label>
+                <input type="text" name="nome" class="form-control" value="{{ ativo.nome if ativo else '' }}" required>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Tipo *</label>
+                <select name="tipo" class="form-select" required>
+                    <option value="">Selecione</option>
+                    <option value="camera" {% if ativo and ativo.tipo=='camera' %}selected{% endif %}>Câmera</option>
+                    <option value="balanca" {% if ativo and ativo.tipo=='balanca' %}selected{% endif %}>Balança</option>
+                    <option value="veiculo" {% if ativo and ativo.tipo=='veiculo' %}selected{% endif %}>Veículo</option>
+                    <option value="outro" {% if ativo and ativo.tipo=='outro' %}selected{% endif %}>Outro</option>
+                </select>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Patrimônio</label>
+                <input type="text" name="patrimonio" class="form-control" value="{{ ativo.patrimonio if ativo else '' }}" placeholder="Nº patrimônio">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Valor Aquisição (R$) *</label>
+                <input type="number" name="valor_aquisicao" class="form-control" step="0.01" value="{{ ativo.valor_aquisicao if ativo else '' }}" required>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Data Aquisição *</label>
+                <input type="date" name="data_aquisicao" class="form-control" value="{{ ativo.data_aquisicao.strftime('%Y-%m-%d') if ativo and ativo.data_aquisicao else '' }}" required>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Vida Útil (meses)</label>
+                <input type="number" name="vida_util" class="form-control" value="{{ ativo.vida_util if ativo else 60 }}">
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Observação</label>
+            <textarea name="observacao" class="form-control" rows="3">{{ ativo.observacao if ativo else '' }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Salvar</button>
+        <a href="{{ url_for('ativos.lista') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

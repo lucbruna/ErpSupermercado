@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}ECD - SPED Contábil{% endblock %}
+{% block content %}
+<h2><i class="bi bi-file-text"></i> ECD - Escrituração Contábil Digital</h2>
+<hr>
+<p>Gere o arquivo SPED da Escrituração Contábil Digital (ECD) para envio ao SPED.</p>
+<form method="POST" class="row g-3">
+    <div class="col-md-4">
+        <label class="form-label">Data Início</label>
+        <input type="date" name="data_inicio" class="form-control" value="{{ ano_inicio }}" required>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Data Fim</label>
+        <input type="date" name="data_fim" class="form-control" value="{{ ano_fim }}" required>
+    </div>
+    <div class="col-md-4 align-self-end">
+        <button type="submit" class="btn btn-info text-white"><i class="bi bi-download"></i> Gerar ECD</button>
+    </div>
+</form>
+{% endblock %}

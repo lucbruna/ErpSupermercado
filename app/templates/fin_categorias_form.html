@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-tags"></i> {{ 'Editar' if cat else 'Nova' }} Categoria</h4>
+<div class="card card-dash"><div class="card-body">
+<form method="POST">
+    <div class="row">
+        <div class="col-md-6 mb-3"><label class="form-label">Nome *</label><input type="text" name="nome" class="form-control" required value="{{ cat.nome if cat else '' }}"></div>
+        <div class="col-md-3 mb-3"><label class="form-label">Tipo</label><select name="tipo" class="form-select"><option value="R" {{ 'selected' if cat and cat.tipo=='R' }}>Receita</option><option value="D" {{ 'selected' if cat and cat.tipo=='D' }}>Despesa</option></select></div>
+        {% if cat %}<div class="col-md-3 mb-3"><div class="form-check mt-4"><input type="checkbox" name="ativo" class="form-check-input" id="chkAtivo" {{ 'checked' if cat.ativo }}><label class="form-check-label" for="chkAtivo">Ativo</label></div></div>{% endif %}
+    </div>
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    <a href="{{ url_for('financeiro.lista_categorias') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+</div></div>
+{% endblock %}

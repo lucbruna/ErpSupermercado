@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="bi bi-sat"></i> Configuração SAT</h4>
+</div>
+<div class="row">
+    <div class="col-md-8">
+        <div class="card card-dash p-4">
+            <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Ambiente</label>
+                        <select name="ambiente" class="form-select">
+                            <option value="1" {% if cfg.ambiente == '1' %}selected{% endif %}>Produção</option>
+                            <option value="2" {% if cfg.ambiente == '2' %}selected{% endif %}>Homologação</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Série NFC-e/SAT</label>
+                        <input type="number" name="serie_nfce" class="form-control" value="{{ cfg.serie_nfce or 1 }}" min="1">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Caminho DLL do SAT</label>
+                    <input type="text" name="caminho_dll_sat" class="form-control" value="{{ cfg.caminho_dll_sat or 'C:\\SAT\\sat.dll' }}" placeholder="C:\SAT\sat.dll">
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Código de Ativação SAT</label>
+                        <input type="password" name="codigo_ativacao_sat" class="form-control" value="{{ cfg.codigo_ativacao_sat or '' }}" placeholder="12345678">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">CNPJ Software House</label>
+                        <input type="text" name="cnpj_software_house" class="form-control" value="{{ cfg.cnpj_software_house or '' }}" placeholder="CNPJ da desenvolvedora">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Certificado Digital A1 (PKCS#12)</label>
+                    <input type="text" name="certificado_digital" class="form-control" value="{{ cfg.certificado_digital or '' }}" placeholder="C:\certificados\cert.pfx">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Senha do Certificado</label>
+                    <input type="password" name="certificado_senha" class="form-control" value="{{ cfg.certificado_senha or '' }}">
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Salvar</button>
+            </form>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-dash p-3">
+            <h6><i class="bi bi-info-circle"></i> Sobre o SAT</h6>
+            <p class="small text-muted mb-1">O SAT (Sistema Autenticador e Transmissor) é utilizado para emissão de CF-e (Cupom Fiscal Eletrônico) em São Paulo e outros estados.</p>
+            <p class="small text-muted mb-0">Para utilizar, é necessário:</p>
+            <ul class="small text-muted">
+                <li>DLL do SAT instalada (C:\SAT\sat.dll)</li>
+                <li>Certificado A1 válido</li>
+                <li>Código de ativação do equipamento</li>
+                <li>CNPJ da Software House</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

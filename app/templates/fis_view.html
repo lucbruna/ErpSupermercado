@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="bi bi-file-earmark-text"></i> Documento #{{ doc.numero }}</h4>
+    <div class="d-flex gap-2">
+        {% if doc.status == '01' %}
+        <a href="{{ url_for('fiscal.transmitir', id=doc.id) }}" class="btn btn-success" onclick="return confirm('Transmitir documento?')"><i class="bi bi-send"></i> Transmitir</a>
+        <button class="btn btn-danger" onclick="cancelarDoc()"><i class="bi bi-x-lg"></i> Cancelar</button>
+        {% endif %}
+        {% if doc.status == '04' %}
+        <a href="{{ url_for('imprimir.danfe', doc_id=doc.id) }}" class="btn btn-info" target="_blank"><i class="bi bi-printer"></i> DANFE</a>
+        <a href="{{ url_for('imprimir.danfe', doc_id=doc.id, formato='pdf') }}" class="btn btn-info"><i class="bi bi-file-pdf"></i> PDF</a>
+        {% endif %}
+        <a href="{{ url_for('fiscal.dashboard') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-8">
+        <div class="card card-dash mb-3"><div class="card-body">
+            <h6>{{ doc.modelo }} - {{ doc.natureza_operacao }}</h6>
+            <table class="table table-sm">
+                <tr><td>Numero</td><td><strong>{{ doc.numero }}</strong></td><td>Serie</td><td><strong>{{ doc.serie }}</strong></td></tr>
+                <tr><td>Chave de Acesso</td><td colspan="3"><code>{{ doc.chave_acesso }}</code></td></tr>
+                <tr><td>Status</td><td><span class="badge bg-{{ 'success' if doc.status=='04' else 'warning' if doc.status=='01' else 'danger' }}">{{ fiscal_status[doc.status] }}</span></td>
+                    <td>Protocolo</td><td>{{ doc.protocolo or '-' }}</td></tr>
+                <tr><td>Data Emissao</td><td>{{ doc.data_emissao.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td>Data Autorizacao</td><td>{{ doc.data_autorizacao.strftime('%d/%m/%Y %H:%M') if doc.data_autorizacao else '-' }}</td></tr>
+                <tr><td>Cliente</td><td colspan="3">{{ doc.cliente.nome if doc.cliente else 'Consumidor Final' }}</td></tr>
+                {% if doc.venda %}<tr><td>Venda</td><td colspan="3"><a href="{{ url_for('pdv.venda_detalhe', venda_id=doc.venda.id) }}">#{{ doc.venda.numero }}</a></td></tr>{% endif %}
+            </table>
+        </div></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-dash mb-3"><div class="card-body">
+            <h6>Valores</h6>
+            <table class="table table-sm">
+                <tr><td>Produtos</td><td class="text-end">R$ {{ "%.2f"|format(doc.valor_produtos|float) }}</td></tr>
+                {% if doc.valor_desconto %}<tr><td>Desconto</td><td class="text-end text-danger">-R$ {{ "%.2f"|format(doc.valor_desconto|float) }}</td></tr>{% endif %}
+                <tr><td><strong>Total</strong></td><td class="text-end"><strong>R$ {{ "%.2f"|format(doc.valor_total|float) }}</strong></td></tr>
+            </table>
+        </div></div>
+    </div>
+</div>
+<div class="card card-dash"><div class="card-body p-0">
+    <table class="table table-sm mb-0">
+        <thead class="table-light"><tr><th>Produto</th><th>Qtd</th><th>Valor Unit.</th><th>Total</th><th>NCM</th><th>CST</th></tr></thead>
+        <tbody>
+            {% for item in doc.itens %}
+            <tr>
+                <td>{{ item.produto.nome }}</td>
+                <td>{{ item.quantidade }}</td>
+                <td>R$ {{ "%.2f"|format(item.valor_unitario|float) }}</td>
+                <td>R$ {{ "%.2f"|format(item.valor_total|float) }}</td>
+                <td>{{ item.ncm or '-' }}</td>
+                <td>{{ item.cst_icms or '-' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div></div>
+{% if doc.status == '05' %}
+<div class="card card-dash mt-3 border-danger"><div class="card-body">
+    <h6 class="text-danger">Motivo do Cancelamento</h6>
+    <p>{{ doc.motivo_cancelamento }}</p>
+</div></div>
+{% endif %}
+
+<div class="modal fade" id="modalCancelar" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title text-danger">Cancelar Documento</h5></div>
+    <form method="POST" action="{{ url_for('fiscal.cancelar', id=doc.id) }}">
+        <div class="modal-body">
+            <div class="mb-3"><label class="form-label">Justificativa (min. 15 caracteres)</label>
+                <textarea name="justificativa" class="form-control" rows="3" required></textarea></div>
+        </div>
+        <div class="modal-footer"><button type="submit" class="btn btn-danger">Confirmar Cancelamento</button></div>
+    </form>
+</div></div></div>
+<script>
+function cancelarDoc() { document.getElementById('modalCancelar').classList.add('show'); }
+</script>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Lista NF-e{% endblock %}
+{% block content %}
+<h2><i class="bi bi-list"></i> Todas as NF-e</h2>
+<hr>
+<a href="{{ url_for('nfe.emitir') }}" class="btn btn-primary mb-3"><i class="bi bi-plus-lg"></i> Nova NF-e</a>
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <thead class="table-dark">
+            <tr><th>#</th><th>Número</th><th>Série</th><th>Cliente</th><th>Valor</th><th>Emissão</th><th>Status</th><th>Protocolo</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+            {% for d in docs %}
+            <tr>
+                <td>{{ d.id }}</td>
+                <td>{{ d.numero }}</td>
+                <td>{{ d.serie }}</td>
+                <td>{{ d.cliente.nome if d.cliente else '-' }}</td>
+                <td>R$ {{ "%.2f"|format(d.valor_total|float) }}</td>
+                <td>{{ d.data_emissao.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td>
+                    {% set cores = {'01':'secondary','02':'info','03':'warning','04':'success','05':'dark','99':'danger'} %}
+                    {% set labels = {'01':'Digitando','02':'Assinado','03':'Transmitindo','04':'Autorizada','05':'Cancelada','99':'Rejeitada'} %}
+                    <span class="badge bg-{{ cores.get(d.status,'secondary') }}">{{ labels.get(d.status, d.status) }}</span>
+                </td>
+                <td>{{ d.protocolo or '-' }}</td>
+                <td>
+                    <a href="{{ url_for('nfe.view', id=d.id) }}" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></a>
+                    {% if d.status == '04' %}
+                    <form method="POST" action="{{ url_for('nfe.cancelar', id=d.id) }}" class="d-inline" onsubmit="return confirm('Cancelar NF-e {{ d.numero }}?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="justificativa" value="Cancelamento solicitado">
+                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-x-lg"></i></button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="9" class="text-center text-muted">Nenhuma NF-e emitida.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-file-text"></i> DRE — Demonstração do Resultado</h4>
+<form method="GET" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input type="date" name="de" class="form-control form-control-sm" value="{{ data_ini.strftime('%Y-%m-%d') }}">
+    </div>
+    <div class="col-auto">
+        <input type="date" name="ate" class="form-control form-control-sm" value="{{ data_fim.strftime('%Y-%m-%d') }}">
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-sm btn-primary">Filtrar</button>
+    </div>
+</form>
+<div class="card card-dash">
+    <div class="card-body">
+        <table class="table table-borderless mb-0">
+            <tr><td style="width:60%"><strong>1. Receita Bruta de Vendas</strong></td><td class="text-end"><strong>R$ {{ '%.2f'|format(receita_bruta) }}</strong></td></tr>
+            <tr><td class="ps-4">(-) Descontos</td><td class="text-end text-danger">(R$ {{ '%.2f'|format(desconto_total) }})</td></tr>
+            <tr class="table-info"><td><strong>2. Receita Líquida</strong></td><td class="text-end"><strong>R$ {{ '%.2f'|format(receita_liquida) }}</strong></td></tr>
+            <tr><td>(-) CMV (Custo Merc. Vendidas)</td><td class="text-end text-danger">(R$ {{ '%.2f'|format(cmv) }})</td></tr>
+            <tr class="table-success"><td><strong>3. Margem Bruta</strong></td><td class="text-end"><strong>R$ {{ '%.2f'|format(margem_bruta) }}</strong> <span class="badge bg-success">{{ '%.1f'|format(margem_percent) }}%</span></td></tr>
+            <tr><td>(-) Despesas Pagas</td><td class="text-end text-danger">(R$ {{ '%.2f'|format(despesas) }})</td></tr>
+            <tr class="table-{% if resultado >= 0 %}primary{% else %}danger{% endif %}">
+                <td><strong>4. Resultado Líquido</strong></td>
+                <td class="text-end">
+                    <strong>R$ {{ '%.2f'|format(resultado) }}</strong>
+                    <span class="badge bg-{% if resultado >= 0 %}success{% else %}danger{% endif %}">{{ '%.1f'|format(resultado_percent) }}%</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-plus-circle"></i> Nova Ordem de Produção</h4>
+<div class="card card-dash p-4">
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label class="form-label">Setor *</label>
+                <select name="setor" class="form-select" required>
+                    <option value="">Selecione</option>
+                    <option value="acougue">Açougue</option>
+                    <option value="padaria">Padaria</option>
+                    <option value="hortifruti">Hortifruti</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Data</label>
+                <input type="date" name="data" class="form-control" value="{{ now().strftime('%Y-%m-%d') }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Observação</label>
+                <input type="text" name="observacao" class="form-control" placeholder="Observações...">
+            </div>
+        </div>
+        <h5><i class="bi bi-box"></i> Itens</h5>
+        <table class="table table-bordered" id="tblItens">
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Qtd Prevista</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <select name="produto_id" class="form-select form-select-sm" required>
+                            <option value="">--</option>
+                            {% for p in produtos %}
+                            <option value="{{ p.id }}">{{ p.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td><input type="number" name="quantidade_prevista" class="form-control form-control-sm" step="0.001" value="1" required></td>
+                    <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()"><i class="bi bi-trash"></i></button></td>
+                </tr>
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-sm btn-outline-success mb-3" onclick="addLinha()"><i class="bi bi-plus-lg"></i> Item</button>
+        <div>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Salvar</button>
+            <a href="{{ url_for('producao.lista') }}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+var produtos = [
+    {% for p in produtos %}{ id: {{ p.id }}, nome: '{{ p.nome|e }}' }{% if not loop.last %},{% endif %}{% endfor %}
+];
+function addLinha() {
+    var tbody = document.querySelector('#tblItens tbody');
+    var tr = document.createElement('tr');
+    var sel = '<select name="produto_id" class="form-select form-select-sm" required><option value="">--</option>';
+    produtos.forEach(function(p) { sel += '<option value="' + p.id + '">' + p.nome + '</option>'; });
+    sel += '</select>';
+    tr.innerHTML = '<td>' + sel + '</td>' +
+        '<td><input type="number" name="quantidade_prevista" class="form-control form-control-sm" step="0.001" value="1" required></td>' +
+        '<td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest(\'tr\').remove()"><i class="bi bi-trash"></i></button></td>';
+    tbody.appendChild(tr);
+}
+</script>
+{% endblock %}

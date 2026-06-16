@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-bell"></i> Notificações</h4>
+<div class="card card-dash p-3">
+    <div class="d-flex justify-content-end mb-2">
+        <button class="btn btn-sm btn-outline-secondary" onclick="marcarTodas()">Marcar todas como lidas</button>
+    </div>
+    {% if notificacoes.items %}
+        {% for n in notificacoes.items %}
+        <div class="d-flex align-items-center p-2 border-bottom {{ 'bg-light' if not n.lida else '' }}">
+            <div class="flex-grow-1">
+                <strong>{{ n.titulo }}</strong>
+                <small class="d-block text-muted">{{ n.mensagem }}</small>
+                <small class="text-muted">{{ n.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+            </div>
+            {% if not n.lida %}
+            <button class="btn btn-sm btn-outline-success ms-2" onclick="marcarLida({{ n.id }}, this)">
+                <i class="bi bi-check-lg"></i>
+            </button>
+            {% endif %}
+        </div>
+        {% endfor %}
+        <nav class="mt-3">
+            <ul class="pagination pagination-sm">
+                {% for p in notificacoes.iter_pages() %}
+                    {% if p %}
+                        <li class="page-item {{ 'active' if p == notificacoes.page else '' }}">
+                            <a class="page-link" href="{{ url_for('notificacoes.lista', page=p) }}">{{ p }}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </nav>
+    {% else %}
+        <p class="text-muted text-center my-4">Nenhuma notificação pendente.</p>
+    {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function marcarLida(id, btn) {
+    await fetch('/notificacoes/marcar_lida/' + id);
+    btn.closest('.d-flex').classList.remove('bg-light');
+    btn.remove();
+    atualizarContador();
+}
+async function marcarTodas() {
+    await fetch('/notificacoes/marcar_todas_lidas');
+    location.reload();
+}
+async function atualizarContador() {
+    const r = await fetch('/notificacoes/contar');
+    const d = await r.json();
+    const badge = document.getElementById('notif-badge');
+    if (badge) {
+        badge.textContent = d.total;
+        badge.style.display = d.total > 0 ? '' : 'none';
+    }
+}
+</script>
+{% endblock %}

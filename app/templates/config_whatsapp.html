@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Config WhatsApp{% endblock %}
+{% block content %}
+<h2><i class="bi bi-whatsapp"></i> Configuração de WhatsApp</h2>
+<hr>
+<p class="text-muted">Configure a API de WhatsApp para envio de cobranças e promoções.</p>
+<form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">API URL</label>
+            <input type="text" name="api_url" class="form-control" value="{{ configs.get('api_url', '') }}" placeholder="https://api.exemplo.com">
+        </div>
+        <div class="col-md-3 mb-3">
+            <label class="form-label">API Key</label>
+            <input type="password" name="api_key" class="form-control" value="{{ configs.get('api_key', '') }}">
+        </div>
+        <div class="col-md-3 mb-3">
+            <label class="form-label">Instance</label>
+            <input type="text" name="instance" class="form-control" value="{{ configs.get('instance', '') }}" placeholder="Nome da instância">
+        </div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Telefone para Teste</label>
+        <input type="text" name="teste_telefone" class="form-control" placeholder="5511999999999">
+    </div>
+    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Salvar</button>
+    <button type="submit" name="testar" value="1" class="btn btn-outline-success"><i class="bi bi-send"></i> Salvar e Testar</button>
+    <a href="javascript:history.back()" class="btn btn-secondary">Voltar</a>
+</form>
+{% endblock %}

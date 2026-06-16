@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-receipt"></i> Venda #{{ venda.numero }}</h4>
+<div class="row g-3">
+    <div class="col-md-8">
+        <div class="card card-dash"><div class="card-body">
+            <h6>Itens da Venda</h6>
+            <table class="table table-sm">
+                <thead><tr><th>Produto</th><th>Qtd</th><th>Preço</th><th>Subtotal</th></tr></thead>
+                <tbody>
+                    {% for item in venda.itens %}
+                    <tr>
+                        <td>{{ item.produto.nome }}</td>
+                        <td>{{ item.quantidade }}</td>
+                        <td>R$ {{ "%.2f"|format(item.preco_unitario|float) }}</td>
+                        <td>R$ {{ "%.2f"|format(item.subtotal|float) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-dash"><div class="card-body">
+            <h6>Resumo</h6>
+            <div class="d-flex justify-content-between border-bottom py-1"><span>Subtotal</span><span>R$ {{ "%.2f"|format(venda.subtotal|float) }}</span></div>
+            <div class="d-flex justify-content-between border-bottom py-1"><span>Desconto</span><span>- R$ {{ "%.2f"|format(venda.desconto|float) }}</span></div>
+            <div class="d-flex justify-content-between border-bottom py-1"><strong>Total</strong><strong>R$ {{ "%.2f"|format(venda.total|float) }}</strong></div>
+            <h6 class="mt-3">Pagamentos</h6>
+            {% for pg in venda.pagamentos %}
+            <div class="d-flex justify-content-between border-bottom py-1">
+                <span>{{ pg.forma_pagamento }}</span><span>R$ {{ "%.2f"|format(pg.valor|float) }}{% if pg.troco > 0 %} (Troco: R$ {{ "%.2f"|format(pg.troco|float) }}){% endif %}</span>
+            </div>
+            {% endfor %}
+            <div class="mt-3">
+                <span class="badge {% if venda.status == 'F' %}bg-success{% elif venda.status == 'C' %}bg-danger{% else %}bg-warning{% endif %}">
+                    {% if venda.status == 'F' %}Finalizada{% elif venda.status == 'C' %}Cancelada{% else %}Aberta{% endif %}
+                </span>
+            </div>
+            <div class="mt-2 text-muted" style="font-size:0.8rem">
+                Operador: {{ venda.usuario.nome }}<br>
+                Data: {{ venda.created_at.strftime('%d/%m/%Y %H:%M') }}
+            </div>
+        </div></div>
+    </div>
+</div>
+<div class="mt-3 d-flex gap-2 flex-wrap">
+    <a href="{{ url_for('pdv.historico_vendas') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+    {% if venda.status == 'F' %}
+    <a href="{{ url_for('imprimir.cupom', venda_id=venda.id) }}" class="btn btn-info" target="_blank"><i class="bi bi-printer"></i> Imprimir Cupom</a>
+    <a href="{{ url_for('imprimir.cupom', venda_id=venda.id, formato='pdf') }}" class="btn btn-info"><i class="bi bi-file-pdf"></i> PDF</a>
+    <a href="{{ url_for('devolucao.nova', venda_id=venda.id) }}" class="btn btn-warning"><i class="bi bi-arrow-return-left"></i> Devolução</a>
+    {% endif %}
+</div>
+{% if venda.devolucoes.count() > 0 %}
+<div class="card card-dash p-3 mt-3">
+    <h6>Devoluções desta venda</h6>
+    {% for d in venda.devolucoes %}
+    <div class="border-bottom py-1">
+        <small>{{ d.data_devolucao.strftime('%d/%m/%Y %H:%M') }} - {{ d.motivo }}</small>
+        <span class="badge bg-{{ 'success' if d.status=='02' else 'warning' }}">{{ 'Estorno OK' if d.status=='02' else 'Registrada' }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

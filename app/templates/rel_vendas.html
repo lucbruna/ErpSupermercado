@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-graph-up"></i> Vendas por Período</h4>
+<div class="card card-dash p-3 mb-3">
+    <form class="row g-2" id="filtroForm">
+        <div class="col-auto"><label class="form-label">De</label><input type="date" name="de" class="form-control form-control-sm" value="{{ request.args.get('de', d1) }}"></div>
+        <div class="col-auto"><label class="form-label">Até</label><input type="date" name="ate" class="form-control form-control-sm" value="{{ request.args.get('ate', d2) }}"></div>
+        <div class="col-auto d-flex align-items-end"><button class="btn btn-sm btn-warning">Filtrar</button></div>
+    </form>
+</div>
+<div class="card card-dash p-3">
+    <canvas id="chartVendas" height="120"></canvas>
+</div>
+<div class="card card-dash p-3 mt-3">
+    <h6>Resumo</h6>
+    <div id="resumo" class="row"></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function carregar() {
+    const params = new URLSearchParams(new FormData(document.getElementById('filtroForm'))).toString();
+    const r = await fetch('{{ url_for("relatorios.dados_vendas") }}?' + params);
+    const d = await r.json();
+    const total = d.valores.reduce((a,b)=>a+b,0);
+    const qtd = d.quant.reduce((a,b)=>a+b,0);
+    document.getElementById('resumo').innerHTML = `
+        <div class="col-4"><strong>Total:</strong> R$ ${total.toFixed(2)}</div>
+        <div class="col-4"><strong>Qtd:</strong> ${qtd}</div>
+        <div class="col-4"><strong>Média:</strong> R$ ${(total/(qtd||1)).toFixed(2)}</div>`;
+    new Chart(document.getElementById('chartVendas'), {
+        type: 'line',
+        data: {
+            labels: d.labels,
+            datasets: [
+                { label: 'Valor (R$)', data: d.valores, borderColor: '#4e8cff', tension: 0.3, fill: true, backgroundColor: 'rgba(78,140,255,0.1)' },
+                { label: 'Qtd', data: d.quant, borderColor: '#ffc107', yAxisID: 'y1', tension: 0.3, borderDash: [5,5] },
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: { mode: 'index', intersect: false },
+            scales: { y: { type: 'linear', position: 'left', beginAtZero: true }, y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false } } }
+        }
+    });
+}
+carregar();
+</script>
+{% endblock %}

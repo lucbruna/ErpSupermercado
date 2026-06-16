@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Vendas por Vendedor{% endblock %}
+{% block content %}
+<h2><i class="bi bi-person-badge"></i> Vendas por Vendedor</h2>
+<hr>
+<form class="row g-3 mb-3" id="form-filtro">
+    <div class="col-auto">
+        <label class="form-label">De</label>
+        <input type="date" name="de" class="form-control" value="{{ d1 }}">
+    </div>
+    <div class="col-auto">
+        <label class="form-label">Até</label>
+        <input type="date" name="ate" class="form-control" value="{{ d2 }}">
+    </div>
+    <div class="col-auto align-self-end">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Filtrar</button>
+    </div>
+</form>
+
+<div class="row">
+    <div class="col-md-8">
+        <canvas id="chartVendedor" height="250"></canvas>
+    </div>
+    <div class="col-md-4">
+        <table class="table table-sm" id="tbl-vendedor">
+            <thead><tr><th>Vendedor</th><th>Qtd</th><th>Total</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+async function carregar(de, ate) {
+    const r = await fetch(`{{ url_for('relatorios.dados_vendas_vendedor') }}?de=${de}&ate=${ate}`);
+    const d = await r.json();
+    const ctx = document.getElementById('chartVendedor').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: d.labels,
+            datasets: [
+                { label: 'Qtd Vendas', data: d.qtd, backgroundColor: '#0d6efd', yAxisID: 'y' },
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+    });
+    const tbody = document.querySelector('#tbl-vendedor tbody');
+    tbody.innerHTML = '';
+    d.labels.forEach((l, i) => {
+        tbody.innerHTML += `<tr><td>${l}</td><td>${d.qtd[i]}</td><td>R$ ${d.valores[i].toFixed(2)}</td></tr>`;
+    });
+}
+document.getElementById('form-filtro').addEventListener('submit', function(e) {
+    e.preventDefault();
+    carregar(this.de.value, this.ate.value);
+});
+carregar('{{ d1 }}', '{{ d2 }}');
+</script>
+{% endblock %}

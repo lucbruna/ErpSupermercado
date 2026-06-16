@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="bi bi-bullseye"></i> Metas Vendedores</h4>
+    <div>
+        <a href="{{ url_for('crm.metas_calcular') }}" class="btn btn-warning"><i class="bi bi-calculator"></i> Calcular Metas</a>
+        <a href="{{ url_for('crm.metas_nova') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nova Meta</a>
+    </div>
+</div>
+<div class="card card-dash">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Vendedor</th>
+                    <th>Mês/Ano</th>
+                    <th>Meta R$</th>
+                    <th>Comissão %</th>
+                    <th>Comissão Fixa</th>
+                    <th>Atingido R$</th>
+                    <th>% Atingido</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in metas %}
+                <tr>
+                    <td>{{ m.usuario.nome }}</td>
+                    <td>{{ m.mes }}/{{ m.ano }}</td>
+                    <td>R$ {{ "%.2f"|format(m.valor_meta|float) }}</td>
+                    <td>{{ "%.2f"|format(m.comissao_percentual|float) }}%</td>
+                    <td>R$ {{ "%.2f"|format(m.comissao_fixa|float) }}</td>
+                    <td>R$ {{ "%.2f"|format(m.valor_atingido|float) }}</td>
+                    <td>
+                        {% set pct = (m.valor_atingido|float / m.valor_meta|float * 100) if m.valor_meta|float > 0 else 0 %}
+                        <div class="d-flex align-items-center gap-1">
+                            <span>{{ "%.1f"|format(pct) }}%</span>
+                            <div class="progress" style="width:80px;height:8px;">
+                                <div class="progress-bar bg-{{ 'success' if pct >= 100 else 'warning' if pct >= 70 else 'danger' }}" style="width:{{ pct if pct <= 100 else 100 }}%"></div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="text-center text-muted py-4">Nenhuma meta cadastrada</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

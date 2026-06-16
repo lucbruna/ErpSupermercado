@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="bi bi-file-earmark-text"></i> NFS-e #{{ nota.id }}</h4>
+    <a href="{{ url_for('nfse.lista') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+</div>
+<div class="row mb-3">
+    <div class="col-md-4">
+        <div class="card card-dash">
+            <div class="card-body">
+                <h6>Cliente</h6>
+                <p class="mb-0">{{ nota.cliente.nome }}</p>
+                <small class="text-muted">{{ nota.cliente.cpf_cnpj or '' }}</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-dash">
+            <div class="card-body">
+                <h6>Valor</h6>
+                <p class="mb-0 fs-4 fw-bold">R$ {{ "%.2f"|format(nota.valor|float) }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-dash">
+            <div class="card-body">
+                <h6>Status</h6>
+                {% set st = nota.status %}
+                <span class="badge bg-{{ 'secondary' if st=='rascunho' else 'primary' if st=='enviado' else 'success' if st=='autorizado' else 'danger' }} fs-6">{{ st }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card card-dash">
+    <div class="card-body">
+        <h6>Detalhes</h6>
+        <p class="mb-1"><strong>Descrição:</strong> {{ nota.descricao or '-' }}</p>
+        <p class="mb-1"><strong>Data:</strong> {{ nota.data_criacao.strftime('%d/%m/%Y %H:%M') if nota.data_criacao else '-' }}</p>
+        <p class="mb-0"><strong>Alíquota:</strong> {{ "%.2f"|format(nota.aliquota|float) if nota.aliquota else '-' }}%</p>
+    </div>
+</div>
+{% endblock %}

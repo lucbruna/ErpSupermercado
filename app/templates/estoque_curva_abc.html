@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Curva ABC{% endblock %}
+{% block content %}
+<h2><i class="bi bi-bar-chart-steps"></i> Curva ABC (últimos 30 dias)</h2>
+<hr>
+
+<div class="row mb-3">
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <h6>Classe A (até 50%)</h6>
+                <span class="fs-4">{{ classificacao|selectattr('classe', 'eq', 'A')|list|length }}</span> itens
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <h6>Classe B (até 80%)</h6>
+                <span class="fs-4">{{ classificacao|selectattr('classe', 'eq', 'B')|list|length }}</span> itens
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h6>Classe C (restante)</h6>
+                <span class="fs-4">{{ classificacao|selectattr('classe', 'eq', 'C')|list|length }}</span> itens
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h6>Total Vendido</h6>
+                <span class="fs-4">R$ {{ total_geral|round(2) }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Classe</th>
+            <th>Produto</th>
+            <th>Qtd Vendida</th>
+            <th>Total R$</th>
+            <th>%</th>
+            <th>% Acum.</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in classificacao %}
+        <tr class="table-{{ 'danger' if item.classe == 'A' else 'warning' if item.classe == 'B' else '' }}">
+            <td><span class="badge bg-{{ 'danger' if item.classe == 'A' else 'warning' if item.classe == 'B' else 'success' }}">{{ item.classe }}</span></td>
+            <td>{{ item.produto.nome }}</td>
+            <td>{{ item.qtd|int if item.qtd else 0 }}</td>
+            <td>R$ {{ item.total|round(2) if item.total else 0 }}</td>
+            <td>{{ item.pct|round(1) if item.pct else 0 }}%</td>
+            <td>{{ item.pct_acum|round(1) if item.pct_acum else 0 }}%</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

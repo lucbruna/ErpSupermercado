@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Impressão de Etiquetas{% endblock %}
+{% block content %}
+<h2><i class="bi bi-tags"></i> Imprimir Etiquetas</h2>
+<hr>
+
+<form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label class="form-label">Tipo de Etiqueta</label>
+            <select name="tipo" class="form-select">
+                <option value="gondola">Gôndola (102x152mm)</option>
+                <option value="balanca">Balança (50x30mm)</option>
+                <option value="codigo_barras">Código de Barras (60x40mm)</option>
+                <option value="a4_10">A4 10 etiquetas (70x38mm)</option>
+                <option value="a4_14">A4 14 etiquetas (99x42mm)</option>
+                <option value="a4_21">A4 21 etiquetas (70x30mm)</option>
+                <option value="a4_24">A4 24 etiquetas (70x25mm)</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Qtd por Produto</label>
+            <select name="qtd" class="form-select">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="6">6</option>
+                <option value="8">8</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex align-items-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" onclick="toggleAll(true)">Marcar Todos</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="toggleAll(false)">Desmarcar</button>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <select class="form-select" onchange="filtrarGrupo(this.value)">
+                <option value="">Todos os Grupos</option>
+                {% for g in grupos %}
+                <option value="{{ g.nome }}">{{ g.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <input type="text" class="form-control" id="filtroBusca" placeholder="Buscar produto..." oninput="filtrarNome()">
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-sm table-hover" id="tblProdutos">
+            <thead class="table-dark">
+                <tr>
+                    <th style="width:40px"><input type="checkbox" onchange="toggleAll(this.checked)"></th>
+                    <th>Código</th>
+                    <th>Produto</th>
+                    <th>Grupo</th>
+                    <th>Preço</th>
+                    <th>Unidade</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in produtos %}
+                <tr data-grupo="{{ p.categoria.nome if p.categoria else '' }}">
+                    <td><input type="checkbox" name="produtos" value="{{ p.id }}"></td>
+                    <td>{{ p.codigo_barras or '' }}</td>
+                    <td>{{ p.nome }}</td>
+                    <td>{{ p.categoria.nome if p.categoria else '-' }}</td>
+                    <td>R$ {{ p.preco_venda }}</td>
+                    <td>{{ p.unidade }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <button type="submit" class="btn btn-primary"><i class="bi bi-printer"></i> Gerar Etiquetas</button>
+    <a href="{{ url_for('estoque.saldo') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+function toggleAll(s) {
+    document.querySelectorAll('#tblProdutos tbody input[type=checkbox]').forEach(function(cb) { cb.checked = s; });
+}
+function filtrarGrupo(grupo) {
+    document.querySelectorAll('#tblProdutos tbody tr').forEach(function(tr) {
+        tr.style.display = !grupo || tr.dataset.grupo === grupo ? '' : 'none';
+    });
+}
+function filtrarNome() {
+    var q = document.getElementById('filtroBusca').value.toLowerCase();
+    document.querySelectorAll('#tblProdutos tbody tr').forEach(function(tr) {
+        tr.style.display = tr.cells[2].textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}

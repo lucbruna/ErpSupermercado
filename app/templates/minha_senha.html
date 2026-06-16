@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-key"></i> Alterar Minha Senha</h4>
+<div class="card card-dash">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label">Senha Atual</label>
+                <input type="password" name="senha_atual" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Nova Senha</label>
+                <input type="password" name="nova_senha" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Alterar Senha</button>
+            <a href="{{ url_for('cadastros.dashboard') }}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

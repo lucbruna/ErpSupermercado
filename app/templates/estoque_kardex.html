@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Kardex - Ficha de Estoque{% endblock %}
+{% block content %}
+<h2><i class="bi bi-journal-text"></i> Kardex / Ficha de Estoque</h2>
+<hr>
+
+<form method="GET" class="row g-2 align-items-end mb-3">
+    <div class="col-md-4">
+        <label for="produto_id" class="form-label">Produto</label>
+        <select name="produto_id" id="produto_id" class="form-select" required>
+            <option value="">-- Selecione --</option>
+            {% for p in produtos %}
+            <option value="{{ p.id }}" {% if produto and produto.id == p.id %}selected{% endif %}>{{ p.nome }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label for="data_ini" class="form-label">Data Início</label>
+        <input type="date" name="data_ini" id="data_ini" class="form-control" value="{{ data_ini or '' }}">
+    </div>
+    <div class="col-md-3">
+        <label for="data_fim" class="form-label">Data Fim</label>
+        <input type="date" name="data_fim" id="data_fim" class="form-control" value="{{ data_fim or '' }}">
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> Filtrar</button>
+    </div>
+</form>
+
+{% if produto %}
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h5 class="mb-0"><strong>{{ produto.nome }}</strong> <small class="text-muted">({{ produto.codigo or '' }})</small></h5>
+    <span class="badge bg-info fs-6">Saldo atual: {{ produto.estoque_atual }}</span>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-sm table-hover table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Data</th>
+                <th>Tipo</th>
+                <th>Documento</th>
+                <th class="text-end">Quantidade</th>
+                <th class="text-end">Preço Unit.</th>
+                <th class="text-end">Saldo Anterior</th>
+                <th class="text-end">Saldo Atual</th>
+                <th>Motivo</th>
+                <th>Usuário</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="table-secondary">
+                <td colspan="5"><em>Saldo inicial antes do período</em></td>
+                <td class="text-end fw-bold">-</td>
+                <td class="text-end fw-bold">{{ saldo_inicial|round(2) }}</td>
+                <td colspan="2"></td>
+            </tr>
+            {% for linha in linhas %}
+            <tr>
+                <td>{{ linha.mov.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td>
+                    {% if linha.mov.tipo == 'E' %}
+                    <span class="badge bg-success">Entrada</span>
+                    {% elif linha.mov.tipo == 'S' %}
+                    <span class="badge bg-danger">Saída</span>
+                    {% elif linha.mov.tipo == 'A' %}
+                    <span class="badge bg-warning text-dark">Ajuste</span>
+                    {% endif %}
+                </td>
+                <td>{{ linha.mov.documento or '-' }}</td>
+                <td class="text-end {% if linha.delta > 0 %}text-success{% elif linha.delta < 0 %}text-danger{% endif %}">
+                    {{ '+' if linha.delta > 0 }}{{ linha.delta|round(2) }}
+                </td>
+                <td class="text-end">{{ linha.mov.preco_unitario|round(2) if linha.mov.preco_unitario else '-' }}</td>
+                <td class="text-end">{{ linha.saldo_anterior|round(2) }}</td>
+                <td class="text-end fw-bold">{{ linha.saldo_atual|round(2) }}</td>
+                <td>{{ linha.mov.motivo or '-' }}</td>
+                <td>{{ linha.mov.usuario.nome if linha.mov.usuario else '-' }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="9" class="text-center text-muted">Nenhum movimento encontrado para este produto.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}

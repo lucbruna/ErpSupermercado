@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-box"></i> {{ 'Editar' if produto else 'Novo' }} Produto</h4>
+<div class="card card-dash">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Nome *</label>
+                    <input type="text" name="nome" class="form-control" value="{{ produto.nome if produto else '' }}" required>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Cód. Barras</label>
+                    <input type="text" name="codigo_barras" class="form-control" value="{{ produto.codigo_barras if produto else '' }}">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Categoria</label>
+                    <select name="categoria_id" class="form-select">
+                        <option value="">Selecione</option>
+                        {% for c in categorias %}
+                        <option value="{{ c.id }}" {{ 'selected' if produto and produto.categoria_id == c.id }}>{{ c.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 mb-3">
+                    <label class="form-label">Descrição</label>
+                    <textarea name="descricao" class="form-control" rows="2">{{ produto.descricao if produto else '' }}</textarea>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Preço Venda *</label>
+                    <input type="number" name="preco_venda" class="form-control" step="0.01" value="{{ produto.preco_venda if produto else '0' }}" required>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Preço Custo</label>
+                    <input type="number" name="preco_custo" class="form-control" step="0.01" value="{{ produto.preco_custo if produto else '0' }}">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label class="form-label">Unidade</label>
+                    <select name="unidade" class="form-select">
+                        <option value="UN" {{ 'selected' if produto and produto.unidade == 'UN' }}>UN</option>
+                        <option value="KG" {{ 'selected' if produto and produto.unidade == 'KG' }}>KG</option>
+                        <option value="LT" {{ 'selected' if produto and produto.unidade == 'LT' }}>LT</option>
+                        <option value="PC" {{ 'selected' if produto and produto.unidade == 'PC' }}>PC</option>
+                    </select>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label class="form-label">Est. Mínimo</label>
+                    <input type="number" name="estoque_minimo" class="form-control" step="0.001" value="{{ produto.estoque_minimo if produto else '0' }}">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label class="form-label">Dias Validade</label>
+                    <input type="number" name="dias_validade" class="form-control" value="{{ produto.dias_validade if produto else '' }}">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">NCM</label>
+                    <input type="text" name="ncm" class="form-control" value="{{ produto.ncm if produto else '' }}">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">CEST</label>
+                    <input type="text" name="cest" class="form-control" value="{{ produto.cest if produto else '' }}">
+                </div>
+                <div class="col-md-3 mb-3 d-flex align-items-end gap-3">
+                    <div class="form-check">
+                        <input type="checkbox" name="controla_lote" class="form-check-input" id="cl" {{ 'checked' if produto and produto.controla_lote }}>
+                        <label class="form-check-label" for="cl">Controla Lote</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" name="peso_balanca" class="form-check-input" id="pb" {{ 'checked' if produto and produto.peso_balanca }}>
+                        <label class="form-check-label" for="pb">Peso Balança</label>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+            <a href="{{ url_for('cadastros.lista_produtos') }}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-people"></i> {{ 'Editar' if func else 'Novo' }} Funcionario</h4>
+<div class="card card-dash"><div class="card-body">
+<form method="POST">
+    <h6>Dados Pessoais</h6>
+    <div class="row">
+        <div class="col-md-5 mb-3"><label class="form-label">Nome *</label><input type="text" name="nome" class="form-control" required value="{{ func.nome if func else '' }}"></div>
+        <div class="col-md-3 mb-3"><label class="form-label">CPF *</label><input type="text" name="cpf" class="form-control" required value="{{ func.cpf if func else '' }}"></div>
+        <div class="col-md-2 mb-3"><label class="form-label">RG</label><input type="text" name="rg" class="form-control" value="{{ func.rg if func else '' }}"></div>
+        <div class="col-md-2 mb-3"><label class="form-label">Genero</label><select name="genero" class="form-select"><option value="">-</option><option value="M" {{ 'selected' if func and func.genero=='M' }}>Masculino</option><option value="F" {{ 'selected' if func and func.genero=='F' }}>Feminino</option></select></div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 mb-3"><label class="form-label">Data Nasc.</label><input type="date" name="data_nascimento" class="form-control" value="{{ func.data_nascimento.strftime('%Y-%m-%d') if func and func.data_nascimento else '' }}"></div>
+        <div class="col-md-3 mb-3"><label class="form-label">Estado Civil</label><select name="estado_civil" class="form-select"><option value="">-</option><option value="solteiro" {{ 'selected' if func and func.estado_civil=='solteiro' }}>Solteiro</option><option value="casado" {{ 'selected' if func and func.estado_civil=='casado' }}>Casado</option><option value="divorciado" {{ 'selected' if func and func.estado_civil=='divorciado' }}>Divorciado</option></select></div>
+        <div class="col-md-3 mb-3"><label class="form-label">CTPS</label><input type="text" name="ctps" class="form-control" value="{{ func.ctps if func else '' }}"></div>
+        <div class="col-md-3 mb-3"><label class="form-label">PIS</label><input type="text" name="pis" class="form-control" value="{{ func.pis if func else '' }}"></div>
+    </div>
+    <h6 class="mt-3">Endereco</h6>
+    <div class="row">
+        <div class="col-md-2 mb-3"><label class="form-label">CEP</label><input type="text" name="cep" class="form-control" value="{{ func.cep if func else '' }}"></div>
+        <div class="col-md-5 mb-3"><label class="form-label">Endereco</label><input type="text" name="endereco" class="form-control" value="{{ func.endereco if func else '' }}"></div>
+        <div class="col-md-1 mb-3"><label class="form-label">Nº</label><input type="text" name="numero" class="form-control" value="{{ func.numero if func else '' }}"></div>
+        <div class="col-md-4 mb-3"><label class="form-label">Bairro</label><input type="text" name="bairro" class="form-control" value="{{ func.bairro if func else '' }}"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-3"><label class="form-label">Cidade</label><input type="text" name="cidade" class="form-control" value="{{ func.cidade if func else '' }}"></div>
+        <div class="col-md-2 mb-3"><label class="form-label">UF</label><input type="text" name="uf" class="form-control" maxlength="2" value="{{ func.uf if func else '' }}"></div>
+        <div class="col-md-3 mb-3"><label class="form-label">Telefone</label><input type="text" name="telefone" class="form-control" value="{{ func.telefone if func else '' }}"></div>
+        <div class="col-md-3 mb-3"><label class="form-label">Celular</label><input type="text" name="celular" class="form-control" value="{{ func.celular if func else '' }}"></div>
+    </div>
+    <h6 class="mt-3">Dados Profissionais</h6>
+    <div class="row">
+        <div class="col-md-3 mb-3"><label class="form-label">Cargo</label><select name="cargo_id" class="form-select"><option value="">-</option>{% for c in cargos %}<option value="{{ c.id }}" {{ 'selected' if func and func.cargo_id == c.id }}>{{ c.nome }}</option>{% endfor %}</select></div>
+        <div class="col-md-3 mb-3"><label class="form-label">Setor</label><select name="setor_id" class="form-select"><option value="">-</option>{% for s in setores %}<option value="{{ s.id }}" {{ 'selected' if func and func.setor_id == s.id }}>{{ s.nome }}</option>{% endfor %}</select></div>
+        <div class="col-md-2 mb-3"><label class="form-label">Data Admissao</label><input type="date" name="data_admissao" class="form-control" value="{{ func.data_admissao.strftime('%Y-%m-%d') if func and func.data_admissao else '' }}"></div>
+        <div class="col-md-2 mb-3"><label class="form-label">Salario</label><input type="number" name="salario_contratual" class="form-control" step="0.01" value="{{ func.salario_contratual if func else '0' }}"></div>
+        <div class="col-md-2 mb-3"><label class="form-label">Tipo</label><select name="tipo_salario" class="form-select"><option value="M" {{ 'selected' if func and func.tipo_salario=='M' }}>Mensalista</option><option value="H" {{ 'selected' if func and func.tipo_salario=='H' }}>Horista</option></select></div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 mb-3"><label class="form-label">Escala</label><select name="escala" class="form-select"><option value="6x1" {{ 'selected' if func and func.escala=='6x1' }}>6x1</option><option value="5x2" {{ 'selected' if func and func.escala=='5x2' }}>5x2</option><option value="12x36" {{ 'selected' if func and func.escala=='12x36' }}>12x36</option></select></div>
+        <div class="col-md-3 mb-3"><div class="form-check mt-4"><input type="checkbox" name="vale_transporte" class="form-check-input" id="chkVT" {{ 'checked' if func and func.vale_transporte }}><label class="form-check-label" for="chkVT">Vale Transporte</label></div></div>
+        <div class="col-md-3 mb-3"><div class="form-check mt-4"><input type="checkbox" name="vale_refeicao" class="form-check-input" id="chkVR" {{ 'checked' if func and func.vale_refeicao }}><label class="form-check-label" for="chkVR">Vale Refeicao</label></div></div>
+        {% if func %}
+        <div class="col-md-3 mb-3"><div class="form-check mt-4"><input type="checkbox" name="ativo" class="form-check-input" id="chkAtivo" {{ 'checked' if func.ativo }}><label class="form-check-label" for="chkAtivo">Ativo</label></div></div>
+        {% endif %}
+    </div>
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    <a href="{{ url_for('rh.lista_funcionarios') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+</div></div>
+{% endblock %}

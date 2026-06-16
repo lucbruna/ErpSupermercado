@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card card-dash">
+            <div class="card-body">
+                <i class="bi bi-file-earmark-text icon"></i>
+                <div class="rot">Total Emitidas</div>
+                <div class="num">{{ total_emitidas }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-dash">
+            <div class="card-body">
+                <i class="bi bi-check-circle icon"></i>
+                <div class="rot">Autorizadas</div>
+                <div class="num text-success">{{ total_autorizadas }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-dash">
+            <div class="card-body">
+                <i class="bi bi-x-circle icon"></i>
+                <div class="rot">Rejeitadas</div>
+                <div class="num text-danger">{{ total_rejeitadas }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card card-dash">
+    <div class="card-body">
+        <h5>NFS-e</h5>
+        <p class="text-muted">Gerencie a emissão de Notas Fiscais de Serviço</p>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('nfse.emitir') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Emitir</a>
+            <a href="{{ url_for('nfse.lista') }}" class="btn btn-info"><i class="bi bi-list-ul"></i> Listar</a>
+            <a href="{{ url_for('nfse.config') }}" class="btn btn-secondary"><i class="bi bi-gear"></i> Config</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

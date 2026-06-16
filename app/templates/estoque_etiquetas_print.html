@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<title>Etiquetas</title>
+<style>
+@page { margin: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, Helvetica, sans-serif; }
+
+/* ── Gôndola (102x152mm) ── */
+.label-gondola {
+    width: 102mm; height: 152mm;
+    border: 1px solid #ccc;
+    display: flex; flex-direction: column;
+    padding: 8mm; page-break-after: always;
+    position: relative;
+}
+.label-gondola .nome { font-size: 18pt; font-weight: bold; margin-bottom: 6mm; }
+.label-gondola .preco { font-size: 36pt; font-weight: bold; color: #c00; margin: 8mm 0; }
+.label-gondola .preco small { font-size: 18pt; }
+.label-gondola .codigo { font-size: 10pt; color: #666; margin-top: auto; }
+.label-gondola .validade { font-size: 10pt; color: #666; }
+.label-gondola .barcode { text-align: center; margin-top: 6mm; }
+
+/* ── Balança (50x30mm) ── */
+.label-balanca {
+    width: 50mm; height: 30mm;
+    border: 1px solid #ccc;
+    display: flex; flex-direction: column;
+    padding: 2mm 3mm; page-break-after: always;
+    font-size: 7pt; overflow: hidden;
+}
+.label-balanca .nome { font-size: 8pt; font-weight: bold; white-space: nowrap; overflow: hidden; }
+.label-balanca .preco { font-size: 14pt; font-weight: bold; color: #c00; text-align: center; margin: 2mm 0; }
+.label-balanca .info { font-size: 6pt; color: #666; display: flex; justify-content: space-between; }
+
+/* ── Código de Barras (60x40mm) ── */
+.label-codigo_barras {
+    width: 60mm; height: 40mm;
+    border: 1px solid #ccc;
+    display: flex; flex-direction: column;
+    padding: 3mm; page-break-after: always;
+    text-align: center;
+}
+.label-codigo_barras .nome { font-size: 9pt; font-weight: bold; margin-bottom: 2mm; }
+.label-codigo_barras .preco { font-size: 18pt; font-weight: bold; color: #c00; }
+.label-codigo_barras .barcode { font-family: 'Libre Barcode 128', monospace; font-size: 28pt; margin: 2mm 0; letter-spacing: 2px; }
+.label-codigo_barras .codigo { font-size: 8pt; color: #666; }
+
+/* ── A4 10 etiquetas (70x38mm) ── */
+.label-a4_10 { width: 70mm; height: 38mm; float: left; border: 1px solid #ccc; padding: 3mm; font-size: 8pt; overflow: hidden; }
+.label-a4_10 .nome { font-size: 9pt; font-weight: bold; }
+.label-a4_10 .preco { font-size: 14pt; font-weight: bold; color: #c00; }
+
+/* ── A4 14 etiquetas (99x42mm) ── */
+.label-a4_14 { width: 99mm; height: 42mm; float: left; border: 1px solid #ccc; padding: 4mm; font-size: 9pt; overflow: hidden; }
+.label-a4_14 .nome { font-size: 11pt; font-weight: bold; }
+.label-a4_14 .preco { font-size: 16pt; font-weight: bold; color: #c00; }
+
+/* ── A4 21 etiquetas (70x30mm) ── */
+.label-a4_21 { width: 70mm; height: 30mm; float: left; border: 1px solid #ccc; padding: 2mm; font-size: 7pt; overflow: hidden; }
+.label-a4_21 .nome { font-size: 8pt; font-weight: bold; }
+.label-a4_21 .preco { font-size: 12pt; font-weight: bold; color: #c00; }
+
+/* ── A4 24 etiquetas (70x25mm) ── */
+.label-a4_24 { width: 70mm; height: 25mm; float: left; border: 1px solid #ccc; padding: 1.5mm; font-size: 6.5pt; overflow: hidden; }
+.label-a4_24 .nome { font-size: 7pt; font-weight: bold; }
+.label-a4_24 .preco { font-size: 10pt; font-weight: bold; color: #c00; }
+
+@media print {
+    body { margin: 0; padding: 0; }
+    .no-print { display: none; }
+}
+</style>
+</head><body>
+<div class="no-print" style="padding:10px;text-align:center;background:#eee;border-bottom:2px solid #aaa;">
+    <button onclick="window.print()" style="padding:10px 20px;font-size:16px;margin:4px;"><i class="bi bi-printer"></i> Imprimir</button>
+    <button onclick="voltar()" style="padding:10px 20px;font-size:16px;margin:4px;">Fechar</button>
+    <span style="margin-left:15px;color:#666;">{{ produtos|length }} etiquetas</span>
+</div>
+{% for p in produtos %}
+{% if tipo == 'gondola' %}
+<div class="label-gondola">
+    <div class="nome">{{ p.nome }}</div>
+    {% if p.peso_balanca %}
+    <div style="font-size:12pt;color:#666;">Peso Variável</div>
+    {% endif %}
+    <div class="preco">R$ <span>{{ "%.2f"|format(p.preco_venda|float) }}</span></div>
+    <div style="font-size:10pt;color:#888;">À vista no dinheiro / PIX</div>
+    {% if p.codigo_barras %}
+    <div class="barcode" style="font-family:monospace;font-size:16pt;letter-spacing:3px;">{{ p.codigo_barras }}</div>
+    {% endif %}
+    <div class="codigo">Cód: {{ p.codigo_barras or p.id }} | {{ p.unidade }}</div>
+</div>
+{% elif tipo == 'balanca' %}
+<div class="label-balanca">
+    <div class="nome">{{ p.nome }}</div>
+    <div class="preco">R$ {{ "%.2f"|format(p.preco_venda|float) }}</div>
+    <div class="info">
+        <span>Cód: {{ p.codigo_barras or p.id }}</span>
+        <span>{{ p.unidade }}</span>
+        <span>{% if p.peso_balanca %}P.V.{% endif %}</span>
+    </div>
+</div>
+{% elif tipo == 'codigo_barras' %}
+<div class="label-codigo_barras">
+    <div class="nome">{{ p.nome }}</div>
+    <div class="preco">R$ {{ "%.2f"|format(p.preco_venda|float) }}</div>
+    {% if p.codigo_barras %}
+    <div class="barcode">{{ p.codigo_barras }}</div>
+    {% else %}
+    <div class="barcode">{{ p.codigo or p.id|string }}</div>
+    {% endif %}
+    <div class="codigo">{{ p.codigo_barras or '' }}</div>
+</div>
+{% elif tipo in ('a4_10', 'a4_14', 'a4_21', 'a4_24') %}
+<div class="label-{{ tipo }}">
+    <div class="nome">{{ p.nome }}</div>
+    <div class="preco">R$ {{ "%.2f"|format(p.preco_venda|float) }}</div>
+    <div style="margin-top:2px;">
+        <span>Cód: {{ p.codigo_barras or p.id }}</span>
+        {% if p.codigo_barras %}
+        <div style="font-family:monospace;font-size:8pt;letter-spacing:1px;margin-top:1px;">{{ p.codigo_barras }}</div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+<script>
+function voltar() {
+    if (document.referrer && document.referrer !== window.location.href) {
+        window.location.href = document.referrer;
+    } else if (window.history.length > 1) {
+        window.history.back();
+    } else {
+        window.close();
+    }
+}
+</script>
+</body></html>

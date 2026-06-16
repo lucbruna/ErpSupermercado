@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Inventário Físico{% endblock %}
+{% block content %}
+<h2><i class="bi bi-clipboard-data"></i> Inventário Físico</h2>
+<hr>
+
+<form method="POST">
+    <div class="table-responsive">
+        <table class="table table-hover" id="tbl-inventario">
+            <thead>
+                <tr>
+                    <th style="width:180px">Produto</th>
+                    <th style="width:100px">Sistema</th>
+                    <th style="width:120px">Qtd Real</th>
+                    <th style="width:120px">Diferença</th>
+                    <th>Motivo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in produtos %}
+                <tr>
+                    <td>{{ p.nome }}</td>
+                    <td class="text-end sistema" data-sistema="{{ p.estoque_atual }}">{{ p.estoque_atual }}</td>
+                    <td>
+                        <input type="number" name="qtd_{{ p.id }}" class="form-control form-control-sm qtd-real"
+                               step="0.001" value="{{ p.estoque_atual }}" data-produto-id="{{ p.id }}">
+                    </td>
+                    <td class="text-end diferenca" id="dif_{{ p.id }}">0</td>
+                    <td>
+                        <input type="text" name="motivo_{{ p.id }}" class="form-control form-control-sm" placeholder="Ajuste inventário">
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Finalizar Inventário</button>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+document.querySelectorAll('.qtd-real').forEach(function(input) {
+    input.addEventListener('input', function() {
+        var row = this.closest('tr');
+        var sistTd = row.querySelector('.sistema');
+        var sistema = parseFloat(sistTd ? sistTd.dataset.sistema : 0);
+        var real = parseFloat(this.value) || 0;
+        var diff = real - sistema;
+        row.querySelector('.diferenca').textContent = diff.toFixed(3);
+    });
+});
+</script>
+{% endblock %}

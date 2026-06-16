@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="bi bi-arrow-up text-success"></i> Contas a Receber</h4>
+    <a href="{{ url_for('financeiro.nova_conta_receber') }}" class="btn btn-success"><i class="bi bi-plus-lg"></i> Nova</a>
+</div>
+<div class="card card-dash"><div class="card-body p-0">
+    <table class="table table-hover mb-0">
+        <thead class="table-light"><tr><th>Descricao</th><th>Cliente</th><th>Valor</th><th>Vencimento</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+            {% for c in contas %}
+            <tr class="{{ 'table-danger' if not c.recebido and c.data_vencimento < hoje }}">
+                <td>{{ c.descricao }}</td>
+                <td>{{ c.cliente.nome if c.cliente else '-' }}</td>
+                <td>R$ {{ "%.2f"|format(c.valor|float) }}</td>
+                <td>{{ c.data_vencimento.strftime('%d/%m/%Y') }}</td>
+                <td>{% if c.recebido %}<span class="badge bg-success">Recebido</span>{% elif c.data_vencimento < hoje %}<span class="badge bg-danger">Vencido</span>{% else %}<span class="badge bg-warning">A vencer</span>{% endif %}</td>
+                <td>
+                    {% if not c.recebido %}
+                    <button class="btn btn-sm btn-success" onclick="baixar({{ c.id }}, '{{ c.descricao }}', {{ c.valor }})"><i class="bi bi-check-lg"></i> Receber</button>
+                    <form method="POST" action="{{ url_for('financeiro.gerar_boleto', conta_id=c.id) }}" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-barcode"></i> Boleto</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" class="text-center text-muted py-4">Nenhuma conta a receber</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div></div>
+<div class="modal fade" id="modalBaixa" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title">Receber Conta</h5></div>
+    <form method="POST" id="formBaixa">
+        <div class="modal-body">
+            <p id="baixaDesc"></p>
+            <div class="mb-3"><label class="form-label">Data Recebimento</label><input type="date" name="data_recebimento" class="form-control" value="{{ hoje.strftime('%Y-%m-%d') }}"></div>
+            <div class="mb-3"><label class="form-label">Valor Recebido</label><input type="number" name="valor_recebido" class="form-control" step="0.01" id="baixaValor"></div>
+        </div>
+        <div class="modal-footer"><button type="submit" class="btn btn-success">Confirmar</button></div>
+    </form>
+</div></div></div>
+<script>
+function baixar(id, desc, valor) {
+    document.getElementById('baixaDesc').textContent = desc;
+    document.getElementById('baixaValor').value = valor;
+    document.getElementById('formBaixa').action = '/financeiro/receber/baixar/' + id;
+    document.getElementById('modalBaixa').classList.add('show');
+}
+</script>
+{% endblock %}

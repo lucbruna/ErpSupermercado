@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-speedometer2"></i> KPIs</h4>
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card card-dash p-3 text-center">
+            <div class="num">{{ vendas_hoje }}</div>
+            <div class="rot">Vendas Hoje</div>
+            <div class="text-success small">R$ {{ '%.2f'|format(total_hoje) }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-dash p-3 text-center">
+            <div class="num">{{ qtd_periodo }}</div>
+            <div class="rot">Vendas Período</div>
+            <div class="text-primary small">R$ {{ '%.2f'|format(total_periodo) }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-dash p-3 text-center">
+            <div class="num">R$ {{ '%.2f'|format(ticket_medio) }}</div>
+            <div class="rot">Ticket Médio</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-dash p-3 text-center">
+            <div class="num">{{ produtos_baixo }}</div>
+            <div class="rot">Estoque Baixo</div>
+            <a href="{{ url_for('relatorios.produtos') }}" class="small">Ver relatório</a>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-dash p-3 text-center">
+            <div class="num text-info">{{ '%.1f'|format(entrada_estoque) }}</div>
+            <div class="rot">Entradas Estoque</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-dash p-3 text-center">
+            <div class="num text-warning">{{ '%.1f'|format(saida_estoque) }}</div>
+            <div class="rot">Saídas Estoque</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-dash p-3 text-center">
+            <div class="num text-success">{{ nfce_autorizadas }}</div>
+            <div class="rot">NFC-e Autorizadas</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-dash p-3 text-center" id="kpi-crescimento">
+            <div class="num">-</div>
+            <div class="rot">Crescimento vs Mês Ant.</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card card-dash p-3">
+            <h6>Vendas por Dia <span class="text-muted small">({{ d1 }} a {{ d2 }})</span></h6>
+            <canvas id="chartVendas" height="200"></canvas>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card card-dash p-3">
+            <h6>Financeiro <span class="text-muted small">({{ d1 }} a {{ d2 }})</span></h6>
+            <canvas id="chartFinanceiro" height="200"></canvas>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-dash p-3">
+            <h6>Vendas por Hora</h6>
+            <canvas id="chartHora" height="200"></canvas>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-dash p-3">
+            <h6>Formas de Pagamento</h6>
+            <canvas id="chartPagamento" height="200"></canvas>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-dash p-3">
+            <h6>Vendas por Categoria</h6>
+            <canvas id="chartCategorias" height="200"></canvas>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card card-dash p-3">
+            <h6>Top Produtos</h6>
+            <canvas id="chartProdutos" height="200"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function carregar(url, id, fn) {
+    const r = await fetch(url);
+    const d = await r.json();
+    fn(d, id);
+}
+
+function linha(d, id) {
+    new Chart(document.getElementById(id), {
+        type: 'line',
+        data: {
+            labels: d.labels,
+            datasets: [
+                { label: 'Valor (R$)', data: d.valores, borderColor: '#4e8cff', yAxisID: 'y', tension: 0.3 },
+                { label: 'Qtd', data: d.quant, borderColor: '#ffc107', yAxisID: 'y1', tension: 0.3, borderDash: [5,5] },
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: { mode: 'index', intersect: false },
+            scales: { y: { type: 'linear', position: 'left', beginAtZero: true }, y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false } } }
+        }
+    });
+}
+
+function financeiro(d, id) {
+    new Chart(document.getElementById(id), {
+        type: 'bar',
+        data: {
+            labels: d.labels,
+            datasets: [
+                { label: 'Entradas', data: d.entradas, backgroundColor: '#198754' },
+                { label: 'Saídas', data: d.saidas, backgroundColor: '#dc3545' },
+            ]
+        },
+        options: { responsive: true, scales: { x: { stacked: false }, y: { beginAtZero: true } } }
+    });
+}
+
+function barras(d, id) {
+    new Chart(document.getElementById(id), {
+        type: 'bar',
+        data: {
+            labels: d.labels,
+            datasets: [{ label: 'Qtd Vendida', data: d.qtd, backgroundColor: '#4e8cff' }]
+        },
+        options: { responsive: true, indexAxis: 'y', scales: { x: { beginAtZero: true } } }
+    });
+}
+
+function pizza(d, id) {
+    const cores = ['#4e8cff','#ffc107','#198754','#dc3545','#6f42c1','#fd7e14','#20c997','#e83e8c'];
+    new Chart(document.getElementById(id), {
+        type: 'doughnut',
+        data: {
+            labels: d.labels,
+            datasets: [{ data: d.valores, backgroundColor: cores }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } } }
+    });
+}
+
+function barraSimples(d, id) {
+    new Chart(document.getElementById(id), {
+        type: 'bar',
+        data: {
+            labels: d.labels,
+            datasets: [{ label: 'Qtd', data: d.qtd, backgroundColor: '#4e8cff' }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+}
+
+carregar('{{ url_for("relatorios.dados_vendas") }}?de={{ d1 }}&ate={{ d2 }}', 'chartVendas', linha);
+carregar('{{ url_for("relatorios.dados_financeiro") }}?de={{ d1 }}&ate={{ d2 }}', 'chartFinanceiro', financeiro);
+carregar('{{ url_for("relatorios.dados_produtos") }}?de={{ d1 }}&ate={{ d2 }}', 'chartProdutos', barras);
+carregar('{{ url_for("relatorios.dados_categorias") }}?de={{ d1 }}&ate={{ d2 }}', 'chartCategorias', pizza);
+carregar('{{ url_for("relatorios.dados_vendas_hora") }}', 'chartHora', barraSimples);
+carregar('{{ url_for("relatorios.dados_formas_pagamento") }}', 'chartPagamento', pizza);
+
+fetch('{{ url_for("relatorios.dados_kpis") }}').then(r=>r.json()).then(d => {
+    const el = document.getElementById('kpi-crescimento');
+    el.innerHTML = `
+        <div class="num ${d.crescimento >= 0 ? 'text-success' : 'text-danger'}">${d.crescimento >= 0 ? '+' : ''}${d.crescimento}%</div>
+        <div class="rot">vs Mês Anterior</div>
+        <div class="small text-muted">Mês atual: R$ ${d.total_atual.toFixed(2)} (${d.qtd_atual} vendas)</div>
+        <div class="small text-muted">Ticket: R$ ${d.ticket_atual.toFixed(2)}</div>
+        <div class="small text-muted">Margem: ${d.margem_percent}% (R$ ${d.margem_bruta.toFixed(2)})</div>`;
+});
+</script>
+{% endblock %}
