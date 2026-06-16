@@ -6,11 +6,12 @@ TODOS os dados de usuário são sanitizados contra XSS.
 import html
 import os
 
+HAS_WEASYPRINT = False
 try:
     from weasyprint import HTML
     HAS_WEASYPRINT = True
-except ImportError:
-    HAS_WEASYPRINT = False
+except Exception:
+    pass
 
 
 def _h(valor):

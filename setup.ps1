@@ -36,7 +36,27 @@ if (-not (Test-Command "python")) {
     Write-Host "[OK] $v" -ForegroundColor Green
 }
 
-# 2. Verificar PostgreSQL
+# 2. Instalar GTK (WeasyPrint)
+Write-Step "Verificando dependencias WeasyPrint..."
+$gtkCheck = Test-Path "C:\Program Files\GTK3-Runtime Win64\bin\libgobject-2.0-0.dll"
+if (-not $gtkCheck) {
+    Write-Host "[!] GTK nao encontrado. Baixando..." -ForegroundColor Yellow
+    $gtkUrl = "https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases/download/2022-01-04/gtk3-runtime-3.24.31-2022-01-04-ts-win64.exe"
+    $gtkOut = "$env:TEMP\gtk3-runtime-win64.exe"
+    try {
+        Invoke-WebRequest -Uri $gtkUrl -OutFile $gtkOut -UseBasicParsing
+        Start-Process -Wait -FilePath $gtkOut -ArgumentList "/verysilent /tasks=""assoc"",""desktopicon"""
+        $env:Path += ";C:\Program Files\GTK3-Runtime Win64\bin"
+        [Environment]::SetEnvironmentVariable("Path", $env:Path, "User")
+        Write-Host "[OK] GTK instalado" -ForegroundColor Green
+    } catch {
+        Write-Host "[!] Falha ao baixar GTK (WeasyPrint nao funcionara sem ele)" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "[OK] GTK encontrado" -ForegroundColor Green
+}
+
+# 3. Verificar PostgreSQL
 Write-Step "Verificando PostgreSQL..."
 $pgService = Get-Service -Name "postgresql*" -ErrorAction SilentlyContinue
 if (-not $pgService -or $pgService.Status -ne "Running") {
@@ -49,7 +69,7 @@ if (-not $pgService -or $pgService.Status -ne "Running") {
     Write-Host "[OK] PostgreSQL rodando" -ForegroundColor Green
 }
 
-# 3. Criar .env
+# 4. Criar .env
 Write-Step "Configurando ambiente..."
 $envFile = Join-Path $PSScriptRoot ".env"
 if (-not (Test-Path $envFile)) {
@@ -78,7 +98,7 @@ SESSION_COOKIE_SAMESITE=Lax
     Write-Host "[OK] .env ja existe" -ForegroundColor Green
 }
 
-# 4. Venv + Dependencias
+# 5. Venv + Dependencias
 Write-Step "Criando ambiente virtual..."
 $venvDir = Join-Path $PSScriptRoot "venv"
 if (-not (Test-Path $venvDir)) {
@@ -93,7 +113,7 @@ Write-Step "Instalando dependencias..."
 & "$venvDir\Scripts\pip" install -r "$PSScriptRoot\requirements.txt" -q
 Write-Host "[OK] Dependencias instaladas" -ForegroundColor Green
 
-# 5. Inicializar Banco
+# 6. Inicializar Banco
 Write-Step "Inicializando banco de dados..."
 try {
     & "$venvDir\Scripts\python" "$PSScriptRoot\run.py"
@@ -103,7 +123,7 @@ try {
     Write-Host "    Verifique se o PostgreSQL esta rodando e as credenciais no .env" -ForegroundColor Yellow
 }
 
-# 6. Atalho Desktop
+# 7. Atalho Desktop
 Write-Step "Criando atalho no Desktop..."
 $desktop = [Environment]::GetFolderPath("Desktop")
 $shortcutPath = Join-Path $desktop "ERP Supermercado.lnk"
@@ -124,7 +144,7 @@ if (-not (Test-Path $shortcutPath)) {
     Write-Host "[OK] Atalho ja existe" -ForegroundColor Green
 }
 
-# 7. Concluido
+# 8. Concluido
 Write-Step "================== INSTALACAO CONCLUIDA ==================" -ForegroundColor Green
 Write-Host ""
 Write-Host "  Login:   admin" -ForegroundColor White
