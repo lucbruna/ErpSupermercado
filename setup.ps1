@@ -117,6 +117,7 @@ Write-Host "[OK] Dependencias instaladas" -ForegroundColor Green
 Write-Step "Inicializando banco de dados..."
 try {
     $env:GLIB_GIO_WARNINGS = "0"
+    $env:SECRET_KEY = (Get-Content $envFile | Where-Object { $_ -match "^SECRET_KEY=" } | ForEach-Object { $_ -replace "^SECRET_KEY=", "" })
     $proc = Start-Process -FilePath "$venvDir\Scripts\python.exe" -ArgumentList "$PSScriptRoot\run.py" -PassThru -NoNewWindow -RedirectStandardOutput "$env:TEMP\erp_startup.log" -RedirectStandardError "$env:TEMP\erp_startup_err.log"
     Start-Sleep -Seconds 3
     if (-not $proc.HasExited) {
@@ -144,8 +145,7 @@ if (-not (Test-Path $shortcutPath)) {
     try {
         $wshell = New-Object -ComObject WScript.Shell
         $shortcut = $wshell.CreateShortcut($shortcutPath)
-        $shortcut.TargetPath = "$venvDir\Scripts\python.exe"
-        $shortcut.Arguments = "$PSScriptRoot\run.py"
+        $shortcut.TargetPath = "$PSScriptRoot\iniciar.bat"
         $shortcut.WorkingDirectory = $PSScriptRoot
         $shortcut.Description = "ERP Supermercado - Login: admin / Senha: Admin@123"
         $shortcut.Save()
