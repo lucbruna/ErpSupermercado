@@ -109,14 +109,27 @@ if (-not (Test-Path $venvDir)) {
 }
 
 Write-Step "Instalando dependencias..."
-& "$venvDir\Scripts\pip" install --upgrade pip -q
+& "$venvDir\Scripts\python" -m pip install --upgrade pip -q 2>$null
 & "$venvDir\Scripts\pip" install -r "$PSScriptRoot\requirements.txt" -q
 Write-Host "[OK] Dependencias instaladas" -ForegroundColor Green
 
 # 6. Inicializar Banco
 Write-Step "Inicializando banco de dados..."
 try {
-    & "$venvDir\Scripts\python" "$PSScriptRoot\run.py"
+    $env:GLIB_GIO_WARNINGS = "0"
+    $proc = Start-Process -FilePath "$venvDir\Scripts\python.exe" -ArgumentList "$PSScriptRoot\run.py" -PassThru -NoNewWindow -RedirectStandardOutput "$env:TEMP\erp_startup.log" -RedirectStandardError "$env:TEMP\erp_startup_err.log"
+    Start-Sleep -Seconds 3
+    if (-not $proc.HasExited) {
+        Write-Host "[OK] Servidor iniciado (PID $($proc.Id))" -ForegroundColor Green
+    } else {
+        $log = Get-Content "$env:TEMP\erp_startup_err.log" -Raw
+        if ($log -match "error|Error") {
+            Write-Host "[!] Erro ao iniciar servidor:" -ForegroundColor Yellow
+            Write-Host $log -ForegroundColor Red
+        } else {
+            Write-Host "[OK] Banco inicializado" -ForegroundColor Green
+        }
+    }
     Write-Host "[OK] Banco inicializado" -ForegroundColor Green
 } catch {
     Write-Host "[!] Erro ao inicializar banco: $_" -ForegroundColor Yellow

@@ -176,6 +176,8 @@ def create_app():
     from app.routes import dashboard_real
     app.register_blueprint(dashboard_real.bp)
 
+    socketio.init_app(app, cors_allowed_origins="*")
+
     from app.socketio_events import init_socketio_events
     init_socketio_events(app)
 
